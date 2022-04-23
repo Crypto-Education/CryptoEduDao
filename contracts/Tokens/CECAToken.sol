@@ -2,15 +2,15 @@
 pragma solidity ^0.8;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20Mintable.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20Pausable.sol";
 
-contract FBusd is ERC20, pausable {
+contract CECAToken is ERC20, ERC20Detailed, ERC20Mintable, ERC20Pausable {
     address public minter;
 
-    constructor() public payable ERC20("Fake Busd", "FBUSD") {
-        _mint(msg.sender, 100000000 * 10 ** 18);
-        // 100M Token Minted
+    constructor() public payable ERC20("CryptoEduCapitalToken", "CECA") {
         minter = msg.sender;
-        //only initially
     }
 
     event MinterChanged(address indexed from, address to);
@@ -23,7 +23,7 @@ contract FBusd is ERC20, pausable {
         return true;
     }
 
-    function mint(address account, uint256 amount) public returns (bool){
+    function mint(address account, uint256 amount) public returns (bool) {
         require(msg.sender == minter, 'Error, msg.sender does not have minter role');
         //CapitalManager
         _mint(account, amount);
