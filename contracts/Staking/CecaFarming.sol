@@ -2,10 +2,10 @@
 // WARNING this contract has not been independently tested or audited
 // DO NOT use this contract with funds of real value until officially tested and audited by an independent expert or group
 
-pragma solidity ^0.8;
+pragma solidity ^0.8.4;
 
-import "@Openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@Openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "../Users/CeEduOwnable.sol";
 
 contract CecaFarming {

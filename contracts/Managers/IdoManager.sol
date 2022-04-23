@@ -1,14 +1,13 @@
-//SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "./CryptoEduCapitalToken.sol";
-import "./CapitalManager.sol";
-import "./CeEduOwnable.sol";
-import "./CeCaIdo.sol";
+import "../Users/CDAOAdmins.sol";
+import "../Users/CeEduOwnable.sol";
+import "../Models/Ido.sol";
 
 contract IdoManager is CeEduOwnable {
     using Address for address;
@@ -16,54 +15,24 @@ contract IdoManager is CeEduOwnable {
     using SafeERC20 for IERC20;
 
     string public name;
-    address public idoMainAddress; // address eligible for ICO
-    address public idoBusdAddress; // address to receive IDO amount
-    address private teamAddress; // address to receive IDO amount
-
-    IERC20 public busdToken;
-    CryptoEduCapitalToken public capitalToken;
-    CapitalManager public capitalManager;
 
     CeCaIdo[] public idoInformationList;
+    event idoNewIdoAdded(address indexed _idoId);
 
-    event tokenAddressSet(uint256 indexed _idoId, address _tokenAddress);
-    event idoDepositLocked(uint256 indexed _idoId);
-    event idoNewIdoAdded(uint256 indexed _idoId);
-
-    constructor(
-        CapitalManager _capitalManager,
-        CryptoEduCapitalToken _capitalToken,
-        address _busdToken,
-        address _idoMainAddress,
-        address _idoBusdAddress,
-        address _teamAddress
-    ) {
-        capitalManager = _capitalManager;
-        capitalToken = _capitalToken;
-        busdToken = IERC20(_busdToken);
-        idoMainAddress = _idoMainAddress;
-        idoBusdAddress = _idoBusdAddress;
-        teamAddress = _teamAddress;
+    constructor() {
         name = 'CEDU_IdoCryptoEduManager';
+        CDAOAdmins settings = getAdminSetting();
+        settings.setIdoManager(this);
     }
 
-    function initialiseNewIdo(string memory _name, uint256 _maxPerUser) public onlyOwner returns (bool) {
-        CeCaIdo newIdo = new CeCaIdo(
-            capitalManager,
-            capitalToken,
-            this,
-            _name,
-            _maxPerUser,
-            busdToken,
-            idoMainAddress,
-            idoBusdAddress,
-            teamAddress);
-        newIdo.transferOwnership(this.getOwner());
+    function initialiseNewIdo(string memory _name, uint256 _maxPerUser) public onlyAdmin returns (bool) {
+        CeCaIdo newIdo = new CeCaIdo(_name);
         idoInformationList.push(newIdo);
+        emit idoNewIdoAdded(address(newIdo));
         return true;
     }
 
-    function emergencyTransfer(address token) public onlyOwner {
+    function emergencyTransfer(address token) public onlySuperAdmin {
         IERC20 tokenToTransfer = IERC20(token);
         tokenToTransfer.transfer(idoBusdAddress, tokenToTransfer.balanceOf(address(this)));
     }
@@ -72,7 +41,7 @@ contract IdoManager is CeEduOwnable {
         return idoInformationList.length;
     }
 
-    function transfertMinterShip(address _newMinter) public onlyOwner {
+    function transfertMinterShip(address _newMinter) public onlySuperAdmin {
         capitalToken.passMinterRole(_newMinter);
     }
 }

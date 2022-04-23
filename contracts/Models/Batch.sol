@@ -1,10 +1,11 @@
-//SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "../Users/CDAOAdmins.sol";
 import "../Tokens/CECAToken.sol";
 import "../Users/CeEduOwnable.sol";
 import "../Managers/CapitalManager.sol";
@@ -44,9 +45,9 @@ contract CeCaBatch is CeEduOwnable {
         }
     }
 
-    modifier onlyCapitalManager() {
+    modifier onlyBatchManager() {
         CDAOAdmins settings = getAdminSetting();
-        require(msg.sender == address (settings.getCapitalManagerAddress()), "");
+        require(msg.sender == address (settings.getBatchManager()), "");
         _;
     }
 
@@ -78,7 +79,7 @@ contract CeCaBatch is CeEduOwnable {
         return true;
     }
 
-    function redistributeCapital(address[] memory payees, uint256[] memory shares_) public onlyCapitalManager returns (bool) {
+    function redistributeCapital(address[] memory payees, uint256[] memory shares_) public onlyBatchManager returns (bool) {
         CDAOAdmins settings = getAdminSetting();
         CapitalManager capitalManager = settings.getCapitalManager();
         for (uint i = 0; i < payees.length; i++)
@@ -95,7 +96,7 @@ contract CeCaBatch is CeEduOwnable {
         return true;
     }
 
-    function lockBatch() public onlyOwner  returns (bool) {
+    function lockBatch() public onlyAdmin  returns (bool) {
         require(!isLocked, "Batch is locked already");
         isLocked = true;
         lockTimestamp = block.timestamp;
@@ -107,6 +108,9 @@ contract CeCaBatch is CeEduOwnable {
     function withdraw() public {
         require(msg.sender != address(0) && isStaking[msg.sender], "ERC20: burn from the zero address");
         // ceca burn
+        // need to approuve
+        CDAOAdmins settings = getAdminSetting();
+        capitalToken = settings.getCapitalToken();
         require(capitalToken.transferFrom(msg.sender, address(0), balance[msg.sender]));
         balance[msg.sender] = 0;
         isStaking[msg.sender] = false;

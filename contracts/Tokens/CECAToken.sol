@@ -1,19 +1,28 @@
-//SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20Mintable.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20Pausable.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract CECAToken is ERC20, ERC20Detailed, ERC20Mintable, ERC20Pausable {
+/// @custom:security-contact contact@cryptoedu.xyz
+
+contract CECAToken is ERC20, ERC20Burnable, Pausable, Ownable {
     address public minter;
+    event MinterChanged(address indexed from, address to);
 
-    constructor() public payable ERC20("CryptoEduCapitalToken", "CECA") {
-        minter = msg.sender;
+    constructor() ERC20("CryptoEduCapitalToken", "CECA") {
+        _mint(msg.sender, 10000000 * 10 ** decimals());
     }
 
-    event MinterChanged(address indexed from, address to);
+    function pause() public onlyOwner {
+        _pause();
+    }
+
+    function unpause() public onlyOwner {
+        _unpause();
+    }
 
     function passMinterRole(address _tokenManger) public returns (bool) {
         require(msg.sender == minter, 'Error, only owner can change pass minter role');
@@ -28,5 +37,13 @@ contract CECAToken is ERC20, ERC20Detailed, ERC20Mintable, ERC20Pausable {
         //CapitalManager
         _mint(account, amount);
         return true;
+    }
+
+    function _beforeTokenTransfer(address from, address to, uint256 amount)
+        internal
+        whenNotPaused
+        override
+    {
+        super._beforeTokenTransfer(from, to, amount);
     }
 }

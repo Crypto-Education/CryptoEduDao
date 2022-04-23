@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
-
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.4;
 
 import "./CDAOAdmins.sol";
 
@@ -83,5 +82,9 @@ abstract contract CeEduOwnable {
     function checkEligibility(address sender) public returns(bool) {
         CapitalManager capitalManager = _adminSetting.getCapitalManager();
         return capitalManager.checkEligibility(sender);
+    }
+
+    function getEligibilityThreshold() public returns(uint256){
+        return _adminSetting.getEligibilityThreshold();
     }
 }

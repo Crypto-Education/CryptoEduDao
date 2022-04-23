@@ -1,5 +1,5 @@
-//SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.4;
 
 import "../Users/CeEduOwnable.sol";
 import "../Models/Ballot.sol";
@@ -7,7 +7,7 @@ import "../Models/Ballot.sol";
 contract BallotsManager is CeEduOwnable {
     Ballot[] public ballotsList;
     string name;
-    constructor() {
+    constructor()  {
         name = 'CEDU_BallotsManager';
     }
     function initialiseNewBallot(string memory _name, string[] memory proposalNames) public onlyAdmin returns (bool) {

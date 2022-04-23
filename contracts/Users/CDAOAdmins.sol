@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "../Managers/BatchManager.sol";
 import "../Managers/IdoManager.sol";
 import "../Tokens/CECAToken.sol";
 import "../Managers/CapitalManager.sol";
@@ -17,6 +18,8 @@ contract CDAOAdmins {
     mapping(address => bool) private _adminGrantList;
 
 
+
+    uint256 public eligibilityThreshold = 100 ether; 
     uint256 public transactionFeesPerBatch = 0.25 ether; // for ido participation fees
     /**
     * all DAOs  address for different purposes
@@ -29,6 +32,7 @@ contract CDAOAdmins {
     CECAToken public capitalToken;
     CapitalManager public capitalManager;
     IdoManager private idoManager;
+    BatchManager private batchManager;
 
     mapping(address => bool) public acceptedTokens;
 
@@ -113,7 +117,7 @@ contract CDAOAdmins {
         return capitalToken;
     }
 
-    function getTransactionFeesPerBatch() public returns(uint256){
+    function getTransactionFeesPerBatch() public returns (uint256){
         return transactionFeesPerBatch;
     }
 
@@ -124,10 +128,17 @@ contract CDAOAdmins {
         return capitalManager;
     }
 
-    function getIdoManager() public returns(IdoManager) {
+    function getIdoManager() public returns (IdoManager) {
         return idoManager;
     }
 
+    function getBatchManager() public returns(BatchManager) {
+        return batchManager;
+    }
+
+    function getEligibilityThreshold() public returns(uint256){
+        return eligibilityThreshold;
+    }
     /** Setters
      */
     function setIdoMainAddress(address _addr) public onlySuperAdmin {
@@ -152,16 +163,36 @@ contract CDAOAdmins {
     }
 
 
-    function setCapitalManager(CapitalManager _addr) public onlySuperAdmin {
+    function setCapitalManager(CapitalManager _addr) internal {
         capitalManager = _addr;
     }
 
-    function setIdoManager(IdoManager _addr) public onlySuperAdmin {
+    function setCapitalManagerByAdmin(CapitalManager _addr) public onlySuperAdmin {
+        capitalManager = _addr;
+    }
+
+    function setIdoManager(IdoManager _addr) internal {
         idoManager = _addr;
+    }
+
+    function setIdoManagerByAdmin(IdoManager _addr) public onlySuperAdmin {
+        idoManager = _addr;
+    }
+
+    function setBatchManager(BatchManager _addr) internal {
+        batchManager = _addr;
+    }
+
+    function setBatchManagerByAdmin(BatchManager _addr) public onlySuperAdmin {
+        batchManager = _addr;
     }
 
     function setTransactionFeesPerBatch(uint256 _transactionFeesPerBatch) public onlyOwner {
         transactionFeesPerBatch = _transactionFeesPerBatch;
+    }
+    
+    function setEligibilityThreshold(uint256 _eligibilityThreshold) public onlySuperAdmin {
+        eligibilityThreshold = _eligibilityThreshold;
     }
 
     /**
@@ -175,7 +206,7 @@ contract CDAOAdmins {
         acceptedTokens[_addr] = false;
     }
 
-    function tokenIsAccepted(address _token) public view returns(bool) {
+    function tokenIsAccepted(address _token) public view returns (bool) {
         return acceptedTokens[_token];
     }
 }

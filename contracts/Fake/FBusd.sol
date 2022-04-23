@@ -1,13 +1,14 @@
-//SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
 
-contract FBusd is ERC20, pausable {
+contract FBusd is ERC20, Pausable {
     address public minter;
 
-    constructor() public payable ERC20("Fake Busd", "FBUSD") {
-        _mint(msg.sender, 100000000 * 10 ** 18);
+    constructor() ERC20("Fake Busd", "FBUSD") {
+        _mint(msg.sender, 100000000 * 10 ** decimals());
         // 100M Token Minted
         minter = msg.sender;
         //only initially

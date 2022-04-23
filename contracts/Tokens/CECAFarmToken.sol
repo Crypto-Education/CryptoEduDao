@@ -1,5 +1,5 @@
-//SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
@@ -19,7 +19,7 @@ contract CECAFarmToken is ERC20 {
     // constructor() ERC20("CryptoEduFakeBUSD", "FUSD")
     constructor() ERC20("CryptoEduFarmToken", "CEFA")
     {
-        _mint(msg.sender, 1000000000000000000000000000);
+        _mint(msg.sender, 1000000000 * 10 * decimals());
         // 1B Token Minted
         minter = msg.sender;
         //only initially
