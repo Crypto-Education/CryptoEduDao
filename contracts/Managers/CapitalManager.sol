@@ -16,11 +16,8 @@ contract CapitalManager is CeEduOwnable {
     using SafeERC20 for IERC20;
 
     string public name;
-    address public mainCapitalAddress; // address to receive all capital deposited
-    address public batchManagerAddress; // address to receive all capital deposited
 
     CECAToken public cecaToken;
-    IERC20 public busdToken;
 
     mapping (address => uint256) public capitalBalance;
     mapping (address => bool) private _blackListAddr;
@@ -31,32 +28,27 @@ contract CapitalManager is CeEduOwnable {
     event ev_newBatchAdded(uint256 indexed _btachId);
     event ev_batchLocked(uint256 indexed _btachId);
 
-    constructor(CECAToken _cecaToken) 
+    constructor(CECAToken _cecaToken, address daoAdmin) CeEduOwnable (daoAdmin)
     {
         cecaToken = _cecaToken;
         name = 'CEDU_CapitalManager';
-        CDAOAdmins settings = getAdminSetting();
-        settings.setCapitalManager(this);
+        /*CDAOAdmins settings = getAdminSetting();
+        settings.setCapitalManager(this);*/
     }
 
     modifier onlyCeCaBatch() {
-        require(isBatch(), "Only CeCa Batch");
+        require(getAdminSetting().getBatchManager().isBatch(), "Only CeCa Batch");
         _;
     }
 
     modifier onlyCeCaBatchAndSuperAdmin() {
-        require(isSuperAdmin() || isBatch());
-        _;
-    }
-
-    modifier isBatchManager() {
-        require(msg.sender == batchManagerAddress, "Should be Batch Creator" );
+        require(isSuperAdmin() || getAdminSetting().getBatchManager().isBatch());
         _;
     }
 
     function emergencyTransfer(address token) public onlySuperAdmin  {
         IERC20 tokenToTransfer = IERC20(token);
-        tokenToTransfer.transfer(mainCapitalAddress, tokenToTransfer.balanceOf(address(this)));
+        tokenToTransfer.transfer(getAdminSetting().getMainCapitalAddress(), tokenToTransfer.balanceOf(address(this)));
     }
 
     function myBalanceDeposited() public view returns (uint256) {
@@ -64,14 +56,8 @@ contract CapitalManager is CeEduOwnable {
     }
 
     function sendCeCaToUser(address _user, uint256 _amount) internal onlyCeCaBatch returns (bool) {
-        bool result = false;
         // sent cecaToken to the sender
         return cecaToken.mint(_user, _amount);
-    }
-    
-
-    function setBatchManagerAddress(address _batchManagerAddress) public onlySuperAdmin {
-        batchManagerAddress = _batchManagerAddress;
     }
 
     function transferMinterShip(address _newMinter) public onlySuperAdmin{

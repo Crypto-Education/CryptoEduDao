@@ -5,10 +5,10 @@ pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "../Managers/BatchManager.sol";
-import "../Managers/IdoManager.sol";
-import "../Tokens/CECAToken.sol";
-import "../Managers/CapitalManager.sol";
+import "../Managers/Interfaces/IBatchManager.sol";
+import "../Managers/Interfaces/IIdoManager.sol";
+import "../Managers/Interfaces/ICapitalManager.sol";
+import "../Managers/Interfaces/IBallotsManager.sol";
 
 contract CDAOAdmins {
     using Address for address;
@@ -29,10 +29,11 @@ contract CDAOAdmins {
     address private teamAddress; // address to receive IDO amount
     address public mainCapitalAddress; // address to receive all capital deposited
 
-    CECAToken public capitalToken;
-    CapitalManager public capitalManager;
-    IdoManager private idoManager;
-    BatchManager private batchManager;
+    IERC20 public capitalToken;
+    ICapitalManager public capitalManager;
+    IIdoManager private idoManager;
+    IBatchManager private batchManager;
+    IBallotsManager private ballotManager;
 
     mapping(address => bool) public acceptedTokens;
 
@@ -64,7 +65,7 @@ contract CDAOAdmins {
 
     function grantAdmin(address _userAddr) public onlySuperAdmin {
         _adminGrantList[_userAddr] = true;
-        OwnershipGranted(_userAddr);
+        emit OwnershipGranted(_userAddr);
     }
 
     function isAdmin(address _userAddr) view public returns (bool) {
@@ -78,13 +79,13 @@ contract CDAOAdmins {
 
     function removerGrantAdmin(address _userAddr) public onlySuperAdmin {
         _adminGrantList[_userAddr] = false;
-        OwnershipRemoved(_userAddr);
+        emit OwnershipRemoved(_userAddr);
     }
 
     function changeSuperAdmin(address _userAddr) public onlySuperAdmin {
         require(isAdmin(_userAddr), "New user most be an administrator");
         _superAdmin = _userAddr;
-        emit SuperOwnershipTransferred(address(0), msgSender);
+        emit SuperOwnershipTransferred(address(0), msg.sender);
     }
 
     /**
@@ -113,30 +114,34 @@ contract CDAOAdmins {
         return mainCapitalAddress;
     }
 
-    function getCapitalToken() public returns (CECAToken) {
+    function getCapitalToken() public view returns (IERC20) {
         return capitalToken;
     }
 
-    function getTransactionFeesPerBatch() public returns (uint256){
+    function getTransactionFeesPerBatch() public view returns (uint256){
         return transactionFeesPerBatch;
     }
 
     /**
      * Managers
      */
-    function getCapitalManager() public returns (CapitalManager) {
+    function getCapitalManager() public view returns (ICapitalManager) {
         return capitalManager;
     }
 
-    function getIdoManager() public returns (IdoManager) {
+    function getIdoManager() public view returns (IIdoManager) {
         return idoManager;
     }
 
-    function getBatchManager() public returns(BatchManager) {
+    function getBatchManager() public view returns(IBatchManager) {
         return batchManager;
     }
 
-    function getEligibilityThreshold() public returns(uint256){
+    function getBallotsManager() public view returns(IBallotsManager) {
+        return ballotManager;
+    }
+
+    function getEligibilityThreshold() public view returns(uint256){
         return eligibilityThreshold;
     }
     /** Setters
@@ -149,7 +154,7 @@ contract CDAOAdmins {
         idoReceiverAddress = _addr;
     }
 
-    function setIdoMainAddress(address _addr) public onlySuperAdmin {
+    function setTeamAddress(address _addr) public onlySuperAdmin {
         teamAddress = _addr;
     }
 
@@ -158,41 +163,45 @@ contract CDAOAdmins {
     }
 
 
-    function setCapitalToken(CECAToken _addr) public onlySuperAdmin {
+    function setCapitalToken(IERC20 _addr) public onlySuperAdmin {
         capitalToken = _addr;
     }
 
 
-    function setCapitalManager(CapitalManager _addr) internal {
+    function setCapitalManager(ICapitalManager _addr) internal {
         capitalManager = _addr;
     }
 
-    function setCapitalManagerByAdmin(CapitalManager _addr) public onlySuperAdmin {
+    function setCapitalManagerByAdmin(ICapitalManager _addr) public onlySuperAdmin {
         capitalManager = _addr;
     }
 
-    function setIdoManager(IdoManager _addr) internal {
+    function setIdoManager(IIdoManager _addr) internal {
         idoManager = _addr;
     }
 
-    function setIdoManagerByAdmin(IdoManager _addr) public onlySuperAdmin {
+    function setIdoManagerByAdmin(IIdoManager _addr) public onlySuperAdmin {
         idoManager = _addr;
     }
 
-    function setBatchManager(BatchManager _addr) internal {
+    function setBatchManager(IBatchManager _addr) internal {
         batchManager = _addr;
     }
 
-    function setBatchManagerByAdmin(BatchManager _addr) public onlySuperAdmin {
+    function setBatchManagerByAdmin(IBatchManager _addr) public onlySuperAdmin {
         batchManager = _addr;
     }
 
-    function setTransactionFeesPerBatch(uint256 _transactionFeesPerBatch) public onlyOwner {
+    function setTransactionFeesPerBatch(uint256 _transactionFeesPerBatch) public onlySuperAdmin {
         transactionFeesPerBatch = _transactionFeesPerBatch;
     }
     
     function setEligibilityThreshold(uint256 _eligibilityThreshold) public onlySuperAdmin {
         eligibilityThreshold = _eligibilityThreshold;
+    }
+
+    function setBallotManagerByAdmin(IBallotsManager _addr) public onlySuperAdmin {
+        ballotManager = _addr;
     }
 
     /**

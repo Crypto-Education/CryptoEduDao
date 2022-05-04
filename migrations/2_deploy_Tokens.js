@@ -1,11 +1,14 @@
-const CryptoEduCapitalToken = artifacts.require("CryptoEduCapitalToken")
-const FarmToken = artifacts.require("CryptoEduFarmToken")
+const CECAToken = artifacts.require("CECAToken")
 const FBusd = artifacts.require("FBusd")
-const CryptoEduFarmToken = artifacts.require("CryptoEduFarmToken")
+
+const CDAOAdmins = artifacts.require("CDAOAdmins")
+
 const CapitalManager = artifacts.require("CapitalManager")
-const IdoCryptoEduManager = artifacts.require("IdoCryptoEduManager")
-const BatchCreator = artifacts.require("BatchCreator")
+const IdoManager = artifacts.require("IdoManager")
+const BatchManager = artifacts.require("BatchManager")
 const BallotsManager = artifacts.require("BallotsManager")
+
+
 
 const addressesList = {
     mainnet : {
@@ -28,53 +31,62 @@ const addressesList = {
 
 module.exports = async function (deployer, network, accounts) {
 
-    let cryptoEduCapitalToken;
-    let farmToken;
+    let cecaToken;
+    let cdaoAdmins;
     let fbusdToken;
     let capitalManager;
-    let batchCreator
-    let idoCryptoEduManager;
+    let batchManager
+    let idoManager;
     let ballotsManager;
 
     switch (network) {
         case "development":
         case "testnet":
-            // Deploy CryptoEduCapitalToken
-            await deployer.deploy(CryptoEduCapitalToken)
-            cryptoEduCapitalToken = await CryptoEduCapitalToken.deployed()
+            // Deploy CDAOAdmins
+            await deployer.deploy(CDAOAdmins)
+            cdaoAdmins = await CDAOAdmins.deployed()
 
-            await deployer.deploy(FarmToken)
-            farmToken = await FarmToken.deployed()
+            /**
+             * deploy tokens
+             */
+            await deployer.deploy(CECAToken)
+            cecaToken = await CECAToken.deployed()
 
             await deployer.deploy(FBusd)
             fbusdToken = await FBusd.deployed()
 
-            await deployer.deploy(CapitalManager, cryptoEduCapitalToken.address, fbusdToken.address, addressesList.testnet.capitalDeposit)
+            /**
+             * deplo managers
+             */
+            await deployer.deploy(CapitalManager, cecaToken.address, cdaoAdmins.address)
             capitalManager = await CapitalManager.deployed()
 
-            await deployer.deploy(BatchCreator, capitalManager.address, fbusdToken.address, addressesList.testnet.capitalDeposit)
-            batchCreator = await BatchCreator.deployed()
+            await deployer.deploy(BatchManager, cdaoAdmins.address)
+            batchManager = await BatchManager.deployed()
 
-            await capitalManager.setBatchCreatorAddress(batchCreator.address)
+            await deployer.deploy(IdoManager, cdaoAdmins.address)
+            idoManager = await IdoManager.deployed()
 
-            await cryptoEduCapitalToken.passMinterRole(capitalManager.address)
+            await deployer.deploy(BallotsManager, cdaoAdmins.address)
+            ballotsManager = await BallotsManager.deployed()
 
-            await deployer.deploy(IdoCryptoEduManager,
-                capitalManager.address,
-                cryptoEduCapitalToken.address,
-                fbusdToken.address,
-                addressesList.testnet.idoMainAddress,
-                addressesList.testnet.idoBusdAddress,
-                addressesList.testnet.teamAddress
-            )
-            idoCryptoEduManager = await IdoCryptoEduManager.deployed()
-            batchCreator.createAppendBatch("Batch 0 |Capital Initial", false, {from: accounts[0]})
+            /**
+             * Settings
+             */
+            // pass minterShip to Capital Manager
+            await cecaToken.passMinterRole(capitalManager.address)
+            await cdaAdmins.setIdoMainAddress(addressesList.testnet.idoMainAddress)
+            await cdaAdmins.setIdoReceiverAddress( addressesList.testnet.idoBusdAddress)
+            await cdaAdmins.setTeamAddress(addressesList.testnet.teamAddress)
+            await cdaAdmins.setMainCapitalAddress(addressesList.testnet.capitalDeposit)
+            await cdaAdmins.setCapitalToken(cecaToken.address)
+            await cdaAdmins.setCapitalManagerByAdmin(capitalManager.address)
+            await cdaAdmins.setIdoManagerByAdmin(idoManager.address)
+            await cdaAdmins.setBatchManagerByAdmin(batchManager.address)
+            await cdaAdmins.setBallotManagerByAdmin(ballotsManager.address)
 
-            await deployer.deploy(BallotsManager, capitalManager.address)
-            ballotsManager = BallotsManager.deployed()
-            /*await ballotsManager.initialiseNewBallot("Objectif du nouveau Batch (Batch 01)",
-                ["200.000 Tropad", "25.000$ Pour L'ico de Particia Network", "Avoir les MEX pour Maiar", "Autres"]
-            );*/
+            await batchManager.createAppendBatch("Batch 0 |Capital Initial", false, {from: accounts[0]})
+            
             break;
 
         case "bsc":

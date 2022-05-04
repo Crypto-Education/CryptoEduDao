@@ -24,7 +24,7 @@ contract Ido is CeEduOwnable {
     bool public isCompleted;
     uint256 public maxPerUser;
     address[] public stakers;
-    uint256 public priceSpentPerToken;
+    uint256 public priceSpentForToken;
     mapping (address => bool) public hasParticipated;
     mapping (address => uint256) public balanceOfParticipant;
     mapping (address => uint) public weightOfParticipant;
@@ -33,10 +33,7 @@ contract Ido is CeEduOwnable {
     event idoDepositLocked(address indexed _idoId);
     event idoNewIdoAdded(address indexed _idoId);
 
-    constructor(
-        string memory _name,
-        uint256 _maxPerUser
-    ) {
+    constructor(string memory _name, uint256 _maxPerUser, address daoAdmin) CeEduOwnable (daoAdmin) {
         name = _name;
         isLocked = false;
         isCompleted = false;
@@ -47,7 +44,7 @@ contract Ido is CeEduOwnable {
 
     modifier isEligibleForIdo() {
         require(
-            isEligible(msg.sender),
+            isEligible(),
             "Amount deposited in capital is not enough or not having all deposited Ceca in your wallet"
         );
         _;
@@ -60,21 +57,19 @@ contract Ido is CeEduOwnable {
         return false;
     }
     function setIdoToken(address _tokenAddress, uint256 _numberOfToken, uint256 _totalAmountSpent,IERC20 _payCrypto) public onlyAdmin {
-        require(isLocked && priceSpentPerToken == 0, "Ido should be locked or Price is already set");
+        require(isLocked && priceSpentForToken == 0, "Ido should be locked or Price is already set");
         require(tokenIsAccepted(address(_payCrypto)), "No enough Token to pay");
         tokenAddress = _tokenAddress;
         numberOfTokenFromIdo = _numberOfToken;
-        priceSpentPerToken = _totalAmountSpent;
+        priceSpentForToken = _totalAmountSpent;
         uint256 totalWeight = getSumOfAllWeight();
-        uint256 amountPerWeight = _numberOfToken.div(totalWeight);
         idoTotalWeight = totalWeight;
         // redistribute the extra deposited 
         for (uint i = 0; i < stakers.length; i++) {
-            //amountPerWeight*weight*_idoPricePerToken-transactionFeesPerBatch
-            uint256 amountPerUser = priceSpentPerToken.div(totalWeight).mul(weightOfParticipant[stakers[i]]).add(capitalManager.transactionFeesPerBatch());
+            uint256 amountPerUser = priceSpentForToken.div(totalWeight).mul(weightOfParticipant[stakers[i]]).add(getAdminSetting().getTransactionFeesPerBatch());
             if (balanceOfParticipant[stakers[i]] > amountPerUser) {
                 // send back extra busd
-                _payCrypto.transferFrom(
+                _payCrypto.transfer(
                     stakers[i],
                     balanceOfParticipant[stakers[i]].sub(amountPerUser)
                 );
@@ -100,7 +95,7 @@ contract Ido is CeEduOwnable {
         
         uint256 thisAddressBalance = tokenToTransfer.balanceOf(address(this));
 
-        require(remainingToDistribute > 0 && thisAddressBalance, "not enogth to redistribute");
+        require(remainingToDistribute > 0 && thisAddressBalance > 0, "not enogth to redistribute");
         // no need to approve because tokens are in this contract
         
         if (thisAddressBalance <= remainingToDistribute) {
@@ -144,12 +139,11 @@ contract Ido is CeEduOwnable {
             stakers.push(msg.sender);
             hasParticipated[msg.sender] = true;
         }
-        CapitalManager capitalManager = settings.getCapitalManager();
-        weightOfParticipant[msg.sender] = capitalManager.getUserWeight(msg.sender); // because weith can change from ido to IDO we need to keep track of in each IDO
+        weightOfParticipant[msg.sender] = getAdminSetting().getBatchManager().getUserWeight(msg.sender); // because weith can change from ido to IDO we need to keep track of in each IDO
         return true;
     }
 
-    function getSumOfAllWeight() public returns(uint256) {
+    function getSumOfAllWeight() public view returns(uint256) {
         uint256 sum = 0;
         for (uint i = 0; i < stakers.length; i++) {
             if (balanceOfParticipant[stakers[i]] > 0) {
@@ -159,10 +153,8 @@ contract Ido is CeEduOwnable {
         return sum;
     }
     
-    function emergencyTransfer(address token) public onlySuperAdmin {
-        IERC20 tokenToTransfer = IERC20(token);
-        CDAOAdmins settings = getAdminSetting();
-        tokenToTransfer.transfer(settings.getIdoReceiverAddress(), tokenToTransfer.balanceOf(address(this)));
+    function emergencyTransfer(IERC20 token) public onlySuperAdmin {
+        token.transfer(getAdminSetting().getIdoReceiverAddress(), token.balanceOf(address(this)));
     }
 
 
@@ -177,18 +169,18 @@ contract Ido is CeEduOwnable {
     /*
      * Balance of functions to extend smart contract functionnalities
      */
-    function getBalanceOfParticipant(address _user) public  returns(uint256) {
+    function getBalanceOfParticipant(address _user) public view  returns(uint256) {
         return balanceOfParticipant[_user];
     }
 
-    function getHasStaked(address _user) public returns(bool) {
+    function getHasStaked(address _user) public view returns(bool) {
         return hasParticipated[_user];
     }
 
-    function getWeightOfParticipant(address _user) public returns(uint256) {
+    function getWeightOfParticipant(address _user) public view returns(uint256) {
         return weightOfParticipant[_user];
     }
-    function getStakers() public returns(address[] memory) {
+    function getStakers() public view returns(address[] memory) {
         return stakers;
     }
 

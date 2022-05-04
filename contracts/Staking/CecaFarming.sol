@@ -11,6 +11,7 @@ import "../Users/CeEduOwnable.sol";
 contract CecaFarming {
     // boolean to prevent reentrancy
     bool internal locked;
+    address owner;
 
     // Library usage
     using SafeERC20 for IERC20;

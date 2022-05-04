@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.5.0",
+    "@truffle/hdwallet-provider": "^2.0.8",
     "enquirer": "^2.3.6",
     "entities": "^2.2.0",
     "errno": "^0.1.8",

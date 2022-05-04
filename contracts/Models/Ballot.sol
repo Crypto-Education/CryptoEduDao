@@ -36,7 +36,7 @@ contract Ballot is CeEduOwnable {
     bool public completed;
 
     /// Create a new ballot to choose one of `proposalNames`.
-    constructor(string memory _name, string[] memory proposalNames) {
+    constructor(string memory _name, string[] memory proposalNames, address daoAdmin) CeEduOwnable (daoAdmin) {
         name = _name;
         completed = false;
 
@@ -55,7 +55,7 @@ contract Ballot is CeEduOwnable {
     }
 
     modifier isEligibleForIdo() {
-        bool checkElig = checkEligibility(msg.sender);
+        bool checkElig = getAdminSetting().getBatchManager().checkEligibility(msg.sender);
         require(
             checkElig,
             "Amount deposited in capital is not enough or not having all deposited Ceca in your wallet"
@@ -70,10 +70,9 @@ contract Ballot is CeEduOwnable {
         require(!completed, "Vote is completed ");
         Voter storage sender = voters[msg.sender];
         require(!sender.voted, "Already voted.");
-        CapitalManager capitalManager = settings.getCapitalManager();
         sender.voted = true;
         sender.vote = proposal;
-        sender.weight = capitalManager.getUserWeight(msg.sender);
+        sender.weight = getAdminSetting().getBatchManager().getUserWeight(msg.sender);
         proposals[proposal].voteCount += sender.weight;
         nbVoters ++;
     }
@@ -103,11 +102,11 @@ contract Ballot is CeEduOwnable {
         completed = true;
     }
 
-    function getProposalSize() public returns(uint) {
+    function getProposalSize() public view returns(uint) {
         return proposals.length;
     }
 
-    function canVote() public returns(bool) {
+    function canVote() public view returns(bool) {
         return voters[msg.sender].voted == false && completed == false;
     }
 }
