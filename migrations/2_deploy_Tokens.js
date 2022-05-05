@@ -74,16 +74,16 @@ module.exports = async function (deployer, network, accounts) {
              * Settings
              */
             // pass minterShip to Capital Manager
-            await cecaToken.passMinterRole(capitalManager.address)
-            await cdaAdmins.setIdoMainAddress(addressesList.testnet.idoMainAddress)
-            await cdaAdmins.setIdoReceiverAddress( addressesList.testnet.idoBusdAddress)
-            await cdaAdmins.setTeamAddress(addressesList.testnet.teamAddress)
-            await cdaAdmins.setMainCapitalAddress(addressesList.testnet.capitalDeposit)
-            await cdaAdmins.setCapitalToken(cecaToken.address)
-            await cdaAdmins.setCapitalManagerByAdmin(capitalManager.address)
-            await cdaAdmins.setIdoManagerByAdmin(idoManager.address)
-            await cdaAdmins.setBatchManagerByAdmin(batchManager.address)
-            await cdaAdmins.setBallotManagerByAdmin(ballotsManager.address)
+            await cecaToken.passMinterRole(capitalManager.address, {from: accounts[0]})
+            await cdaoAdmins.setIdoMainAddress(addressesList.testnet.idoMainAddress, {from: accounts[0]})
+            await cdaoAdmins.setIdoReceiverAddress( addressesList.testnet.idoBusdAddress, {from: accounts[0]})
+            await cdaoAdmins.setTeamAddress(addressesList.testnet.teamAddress, {from: accounts[0]})
+            await cdaoAdmins.setMainCapitalAddress(addressesList.testnet.capitalDeposit, {from: accounts[0]})
+            await cdaoAdmins.setCapitalToken(cecaToken.address, {from: accounts[0]})
+            await cdaoAdmins.setCapitalManagerByAdmin(capitalManager.address, {from: accounts[0]})
+            await cdaoAdmins.setIdoManagerByAdmin(idoManager.address, {from: accounts[0]})
+            await cdaoAdmins.setBatchManagerByAdmin(batchManager.address, {from: accounts[0]})
+            await cdaoAdmins.setBallotManagerByAdmin(ballotsManager.address, {from: accounts[0]})
 
             await batchManager.createAppendBatch("Batch 0 |Capital Initial", false, {from: accounts[0]})
             

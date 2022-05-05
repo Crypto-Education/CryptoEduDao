@@ -218,4 +218,11 @@ contract CDAOAdmins {
     function tokenIsAccepted(address _token) public view returns (bool) {
         return acceptedTokens[_token];
     }
+
+    function checkEligibility(address _user) public returns (bool) {
+        uint256 totalInLocked = batchManager.getTotalInLockedBatch(_user);
+        return totalInLocked >= getEligibilityThreshold()
+                && totalInLocked == getCapitalToken().balanceOf(_user)
+                && capitalManager.isBlacklisted(_user);
+    }
 }

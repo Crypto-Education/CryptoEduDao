@@ -1,10 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "../Users/CeEduOwnable.sol";
 
 contract Ido is CeEduOwnable {
@@ -50,15 +46,15 @@ contract Ido is CeEduOwnable {
         _;
     }
 
-    function isEligible() public returns(bool) {
-        if (checkEligibility(msg.sender)) {
+    function isEligible() public view returns(bool) {
+        if (getAdminSetting().checkEligibility(msg.sender)) {
             return balanceOfParticipant[msg.sender] < maxPerUser;
         }
         return false;
     }
     function setIdoToken(address _tokenAddress, uint256 _numberOfToken, uint256 _totalAmountSpent,IERC20 _payCrypto) public onlyAdmin {
         require(isLocked && priceSpentForToken == 0, "Ido should be locked or Price is already set");
-        require(tokenIsAccepted(address(_payCrypto)), "No enough Token to pay");
+        require(getAdminSetting().tokenIsAccepted(address(_payCrypto)), "No enough Token to pay");
         tokenAddress = _tokenAddress;
         numberOfTokenFromIdo = _numberOfToken;
         priceSpentForToken = _totalAmountSpent;
@@ -118,7 +114,7 @@ contract Ido is CeEduOwnable {
         if (amountToDistributeNow == remainingToDistribute) {
             isCompleted = true;
             tokenToTransfer.transfer(
-                getTeamAddress(),
+                getAdminSetting().getTeamAddress(),
                 onePercent
             );
         }
@@ -127,10 +123,9 @@ contract Ido is CeEduOwnable {
     function depositForIdo(uint256 _amount, IERC20 _payCrypto) public isEligibleForIdo returns (bool)  {
         // Require amount greater than 0
         require(_amount >= 0 && _amount.add(balanceOfParticipant[msg.sender]) <= maxPerUser && !isLocked, "amount cannot be 0 and should be less than maximum");
-        require(tokenIsAccepted(address(_payCrypto)) && _payCrypto.balanceOf(msg.sender) >= _amount, "No enough Token to pay");
+        require(getAdminSetting().tokenIsAccepted(address(_payCrypto)) && _payCrypto.balanceOf(msg.sender) >= _amount, "No enough Token to pay");
         // Transfer 
-        CDAOAdmins settings = getAdminSetting();
-        require(_payCrypto.transferFrom(msg.sender, settings.getIdoReceiverAddress(), _amount), "Unable to transfer crypto");
+        require(_payCrypto.transferFrom(msg.sender, getAdminSetting().getIdoReceiverAddress(), _amount), "Unable to transfer crypto");
 
         balanceOfParticipant[msg.sender] = balanceOfParticipant[msg.sender].add(_amount);
         totalDeposited = totalDeposited.add(_amount);

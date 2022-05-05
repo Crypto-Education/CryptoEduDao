@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
 import "../Users/CeEduOwnable.sol";
 import "../Models/Batch.sol";
 
@@ -21,7 +19,7 @@ contract BatchManager is CeEduOwnable {
         settings.setBatchManager(this);*/
     }
 
-    function createAppendBatch(string memory _name, bool _locked) external onlyAdmin returns (bool) {
+   function createAppendBatch(string memory _name, bool _locked) external onlyAdmin returns (bool) {
         Batch newBatch = new Batch(_name, _locked, address(getAdminSetting()));
         batchList.push(newBatch);
         emit ev_batchCreated(newBatch);
@@ -66,7 +64,7 @@ contract BatchManager is CeEduOwnable {
         return batchList.length;
     }
     
-    function getTotalInLockedBatch(address _user) private view returns(uint256) {
+    function getTotalInLockedBatch(address _user) public view returns(uint256) {
         uint256 totalInLockedBatch = 0;
         for (uint i = 0; i < batchList.length; i++) {
             totalInLockedBatch = totalInLockedBatch.add(batchList[i].myDepositedInBatchForUser(_user, true));
@@ -78,17 +76,6 @@ contract BatchManager is CeEduOwnable {
         for (uint i = 0; i < batchList.length; i++) {
             batchList[i].recoverLostWallet(_previousAddr, _newAddr);
         }
-    }
-
-    function checkEligibility(address _user) override public view returns (bool) {
-
-        // eligibilityThreshold
-        // must hold ceca and has deposited before
-        // ceca balance in wallet
-        uint256 totalInLockedBatch = getTotalInLockedBatch(_user);
-        return totalInLockedBatch >= getEligibilityThreshold()
-        && totalInLockedBatch == getAdminSetting().getCapitalToken().balanceOf(_user)
-        && !getAdminSetting().getCapitalManager().isBlacklisted(_user);
     }
     
     function getUserWeight(address _user) public view returns (uint) {

@@ -1,14 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "../Users/CDAOAdmins.sol";
-import "../Tokens/CECAToken.sol";
 import "../Users/CeEduOwnable.sol";
-import "../Managers/CapitalManager.sol";
+import "../Tokens/CECAToken.sol";
+import "../Managers/CapitalManager.sol"; 
 
 contract Batch is CeEduOwnable {
     using Address for address;
@@ -57,15 +52,14 @@ contract Batch is CeEduOwnable {
     }
 
     modifier onlyBatchManager() {
-        CDAOAdmins settings = getAdminSetting();
-        require(msg.sender == address (settings.getBatchManager()), "");
+        require(msg.sender == address (getAdminSetting().getBatchManager()), "");
         _;
     }
 
     function depositInCapital(uint256 _amount, IERC20 _payCrypto) public returns (bool) {
         // Require amount greater than 0
         require(_amount >= 0 && !isLocked, "Cant deposit bach is locked or amount ");
-        require(tokenIsAccepted(address(_payCrypto)) && _payCrypto.balanceOf(msg.sender) >= _amount, "You dont have enougth busd");
+        require(getAdminSetting().tokenIsAccepted(address(_payCrypto)) && _payCrypto.balanceOf(msg.sender) >= _amount, "You dont have enougth busd");
         // Transfer Token tokens to getMainCapitalAddress
 
         require(_payCrypto.transferFrom(msg.sender, getAdminSetting().getMainCapitalAddress(), _amount), "Unable to transfer BUSD");
@@ -117,8 +111,7 @@ contract Batch is CeEduOwnable {
         require(msg.sender != address(0) && isStaking[msg.sender], "ERC20: burn from the zero address");
         // ceca burn
         // need to approuve
-        CDAOAdmins settings = getAdminSetting();
-        IERC20 capitalToken = settings.getCapitalToken();
+        IERC20 capitalToken = getAdminSetting().getCapitalToken();
         require(capitalToken.transferFrom(msg.sender, address(0), balance[msg.sender]));
         balance[msg.sender] = 0;
         isStaking[msg.sender] = false;

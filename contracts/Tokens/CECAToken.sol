@@ -13,7 +13,7 @@ contract CECAToken is ERC20, ERC20Burnable, Pausable, Ownable {
     event MinterChanged(address indexed from, address to);
 
     constructor() ERC20("CryptoEduCapitalToken", "CECA") {
-        _mint(msg.sender, 10000000 * 10 ** decimals());
+        minter = msg.sender;
     }
 
     function pause() public onlyOwner {
