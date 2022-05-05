@@ -75,6 +75,7 @@ module.exports = async function (deployer, network, accounts) {
              */
             // pass minterShip to Capital Manager
             await cecaToken.passMinterRole(capitalManager.address, {from: accounts[0]})
+            await cdaoAdmins.addAcceptedTokens(fbusdToken.address, {from: accounts[0]})
             await cdaoAdmins.setIdoMainAddress(addressesList.testnet.idoMainAddress, {from: accounts[0]})
             await cdaoAdmins.setIdoReceiverAddress( addressesList.testnet.idoBusdAddress, {from: accounts[0]})
             await cdaoAdmins.setTeamAddress(addressesList.testnet.teamAddress, {from: accounts[0]})
@@ -90,40 +91,7 @@ module.exports = async function (deployer, network, accounts) {
             break;
 
         case "bsc":
-            // Deploy CryptoEduCapitalToken
-            await deployer.deploy(CryptoEduCapitalToken)
-            cryptoEduCapitalToken = await CryptoEduCapitalToken.deployed()
-
-            await deployer.deploy(CryptoEduFarmToken)
-            const cryptoEduFarmToken = await CryptoEduFarmToken.deployed()
-
-            await deployer.deploy(CapitalManager,
-                cryptoEduCapitalToken.address,
-                addressesList.mainnet.busd,
-                addressesList.mainnet.capitalDeposit)
-            capitalManager = await CapitalManager.deployed()
-
-            await deployer.deploy(BatchCreator, capitalManager.address, addressesList.mainnet.busd, addressesList.mainnet.capitalDeposit)
-            batchCreator = await BatchCreator.deployed()
-
-            await capitalManager.setBatchCreatorAddress(batchCreator.address)
-
-            //change token's owner/minter from deployer to capitalManager
-            await cryptoEduCapitalToken.passMinterRole(capitalManager.address)
-
-            await deployer.deploy(IdoCryptoEduManager,
-                capitalManager.address,
-                cryptoEduCapitalToken.address,
-                addressesList.mainnet.busd,
-                addressesList.mainnet.idoMainAddress,
-                addressesList.mainnet.idoBusdAddress,
-                addressesList.mainnet.teamAddress
-            )
-            idoCryptoEduManager = await IdoCryptoEduManager.deployed()
-            await batchCreator.createAppendBatch("Batch 0 |Capital Initial", false, {from: accounts[0]})
-
-            await deployer.deploy(BallotsManager, capitalManager.address)
-            ballotsManager = BallotsManager.deployed()
+            // To do later
             break;
     }
 }
