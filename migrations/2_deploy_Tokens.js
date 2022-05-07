@@ -17,7 +17,10 @@ const addressesList = {
         capitalDeposit: "0xE820cf29813939d84160FEbe5Aa1bd52422b1366",
         idoMainAddress: "0xA6A97c85Bd58B4ABd5d5578b4221c8c80B9aB382",
         idoBusdAddress: "0xD7AcE5005CE05f7e4F63331cd384c4E49B850C1e",
-        teamAddress: "0x9B3a3Cc32645D845a25e3c07e9EeC02c2528331b"
+        teamAddress: "0x9B3a3Cc32645D845a25e3c07e9EeC02c2528331b",
+        oldCapitalToken: "0xD5A26B2c4856F0eB6d3a8f1237152BACC70d4f31",
+        oldCecaBatch: "0x2db3c0F4172e009d478D399ee12CDBA68875DebE",
+        oldCapitalManager: "0x4c5d6141Ff4BF563779B8547349219804D31Ad68",
     },
     testnet : {
         busd: '0xe9e7cea3dedca5984780bafc599bd69add087d56',
@@ -98,9 +101,9 @@ module.exports = async function (deployer, network, accounts) {
             /**Set Migratot Contract */
             await cdaoAdmins.setMigratorV1V2(migrationV1V2.address, {from: accounts[0]})
             /** Set Old contracts for migration from V1 */
-            await cdaoAdmins.setOldCapitalToken(ballotsManager.address, {from: accounts[0]})
-            await cdaoAdmins.setOldCeCaBatch(ballotsManager.address, {from: accounts[0]})
-            await cdaoAdmins.setOldCapitalManager(ballotsManager.address, {from: accounts[0]})
+            await cdaoAdmins.setOldCapitalToken(ddressesList.testnet.oldCapitalToken, {from: accounts[0]})
+            await cdaoAdmins.setOldCeCaBatch(ddressesList.testnet.oldCecaBatch, {from: accounts[0]})
+            await cdaoAdmins.setOldCapitalManager(ddressesList.testnet.oldCapitalManager, {from: accounts[0]})
 
             /**Initialise data contracts */
             await batchManager.createAppendBatch("Batch 0 |Capital Initial", false, {from: accounts[0]})
