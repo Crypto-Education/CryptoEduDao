@@ -24,4 +24,6 @@ interface IBatchManager {
     function checkEligibility(address _user) external returns (bool);
     
     function getUserWeight(address _user) external returns (uint);
+
+    function getBatch(uint index) external returns(IBatch);
 }

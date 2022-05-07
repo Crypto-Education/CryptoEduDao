@@ -4,6 +4,7 @@ pragma solidity ^0.8.4;
 import "../Users/CeEduOwnable.sol";
 import "../Models/Batch.sol";
 
+
 contract BatchManager is CeEduOwnable {
     using SafeMath for uint256;
     using Address for address;
@@ -38,13 +39,13 @@ contract BatchManager is CeEduOwnable {
     }
     
     //Redistribute token cap to old investors
-    function redistributeToOldInvestor(address[] memory payees, uint256[] memory shares_) payable public onlySuperAdmin returns(bool) {
+    function redistributeToOldInvestor(address[] memory payees, uint256[] memory shares_, uint batch_index) payable public onlySuperAdmin returns(bool) {
         require(payees.length == shares_.length && batchList.length > 0 && payees.length > 0, "redistributeToOldInvestor: payees and shares length mismatch");
         for (uint i = 0; i < payees.length; i++) {
             require(shares_[i] > 0, "amount cannot be 0");
             require(address(payees[i]) != address(0), "can't sent to 0x address");
         }
-        return batchList[0].redistributeCapital(payees, shares_);
+        return batchList[batch_index].redistributeCapital(payees, shares_);
     }
 
     // to remove
@@ -58,6 +59,10 @@ contract BatchManager is CeEduOwnable {
             sum = sum.add(batchList[i].totalDeposited());
         }
         return sum;
+    }
+
+    function getBatch(uint index) public view returns(Batch) {
+        return batchList[index];
     }
 
     function getBatchListSize() public view returns (uint) {

@@ -10,6 +10,7 @@ import "../../Managers/Interfaces/IBatchManager.sol";
 import "../../Managers/Interfaces/IIdoManager.sol";
 import "../../Managers/Interfaces/ICapitalManager.sol";
 import "../../Managers/Interfaces/IBallotsManager.sol";
+import "./V1Interfaces.sol";
 
 interface ICDAOAdmins {
 
@@ -42,6 +43,15 @@ interface ICDAOAdmins {
 
     function getTransactionFeesPerBatch() external view returns (uint256);
     /**
+        Old contract from V1
+     */
+    function getOldCapitalToken() external view returns (IERC20);
+    function getOldCeCaBatch()  external view returns (OldCeCaBatch);
+    function getOldCapitalManager() external view returns (OldCapitalManager);
+    function getMigratorV1V2()  external view returns (address);
+
+
+    /**
      * Managers
      */
     function getCapitalManager() external view returns (ICapitalManager);
@@ -53,37 +63,6 @@ interface ICDAOAdmins {
     function getBallotsManager() external view returns(IBallotsManager);
 
     function getEligibilityThreshold() external view returns(uint256);
-    /** Setters
-     */
-    function setIdoMainAddress(address _addr) external;
-
-    function setIdoReceiverAddress(address _addr) external ;
-
-    function setTeamAddress(address _addr) external ;
-
-    function setMainCapitalAddress(address _addr) external ;
-
-
-    function setCapitalToken(IERC20 _addr) external;
-
-
-    function setCapitalManager(ICapitalManager _addr) external ;
-
-    function setCapitalManagerByAdmin(ICapitalManager _addr) external;
-
-    function setIdoManager(IIdoManager _addr) external;
-
-    function setIdoManagerByAdmin(IIdoManager _addr) external;
-
-    function setBatchManager(IBatchManager _addr) external;
-
-    function setBatchManagerByAdmin(IBatchManager _addr) external ;
-
-    function setTransactionFeesPerBatch(uint256 _transactionFeesPerBatch) external;
-    
-    function setEligibilityThreshold(uint256 _eligibilityThreshold) external ;
-
-    function setBallotManagerByAdmin(IBallotsManager _addr) external ;
 
     /**
      * add accepted cryptos as payment

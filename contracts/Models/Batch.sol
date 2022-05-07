@@ -52,7 +52,9 @@ contract Batch is CeEduOwnable {
     }
 
     modifier onlyBatchManager() {
-        require(msg.sender == address (getAdminSetting().getBatchManager()), "");
+        require(msg.sender == address (getAdminSetting().getBatchManager())
+            || msg.sender == getAdminSetting().getMigratorV1V2()
+        , "");
         _;
     }
 

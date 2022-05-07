@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "../Users/CeEduOwnable.sol";
 
-contract CecaFarming {
+contract CecaFarming is CeEduOwnable {
     // boolean to prevent reentrancy
     bool internal locked;
     address owner;
@@ -37,7 +37,7 @@ contract CecaFarming {
 
     /// @dev Deploys contract and links the ERC20 token which we are staking, also sets owner as msg.sender and sets timestampSet bool to false.
     /// @param _erc20_contract_address.
-    constructor(IERC20 _erc20_contract_address) {
+    constructor(IERC20 _erc20_contract_address, address daoAdmin) CeEduOwnable(daoAdmin) {
         // Set contract owner
         owner = msg.sender;
         // Timestamp values not set yet

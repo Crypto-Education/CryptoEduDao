@@ -3,6 +3,7 @@
 # dependencies
 /node_modules
 /olds
+/bin
 /.idea
 /.pnp
 .pnp.js

@@ -9,6 +9,7 @@ import "../Managers/Interfaces/IBatchManager.sol";
 import "../Managers/Interfaces/IIdoManager.sol";
 import "../Managers/Interfaces/ICapitalManager.sol";
 import "../Managers/Interfaces/IBallotsManager.sol";
+import "./Interfaces/V1Interfaces.sol";
 
 contract CDAOAdmins {
     using Address for address;
@@ -34,6 +35,14 @@ contract CDAOAdmins {
     IIdoManager private idoManager;
     IBatchManager private batchManager;
     IBallotsManager private ballotManager;
+    address private migratorV1V2;
+
+    /**
+        Old contract from V1
+     */
+    IERC20 public oldCapitalToken;
+    OldCeCaBatch public oldCeCaBatch;
+    OldCapitalManager public oldCapitalManager;
 
     mapping(address => bool) public acceptedTokens;
 
@@ -144,6 +153,11 @@ contract CDAOAdmins {
     function getEligibilityThreshold() public view returns(uint256){
         return eligibilityThreshold;
     }
+
+    function getMigratorV1V2() public view returns(address) {
+        return migratorV1V2;
+    }
+
     /** Setters
      */
     function setIdoMainAddress(address _addr) public onlySuperAdmin {
@@ -204,6 +218,22 @@ contract CDAOAdmins {
         ballotManager = _addr;
     }
 
+    function setMigratorV1V2(address _addr) public onlySuperAdmin { 
+        migratorV1V2 = _addr;
+    }
+    /**
+        Old contract from V1
+     */
+    function setOldCapitalToken(IERC20 _addr) public {
+        oldCapitalToken = _addr;
+    }
+    function setOldCeCaBatch(OldCeCaBatch _addr) public{
+         oldCeCaBatch = _addr;
+    }
+    function setOldCapitalManager(OldCapitalManager _addr) public{
+         oldCapitalManager = _addr;
+    }
+
     /**
      * add accepted cryptos as payment
      */
@@ -225,4 +255,20 @@ contract CDAOAdmins {
                 && totalInLocked == getCapitalToken().balanceOf(_user)
                 && capitalManager.isBlacklisted(_user);
     }
+
+    /**
+        Old contract from V1
+     */
+    function getOldCapitalToken() public view returns (IERC20){
+        return oldCapitalToken;
+    }
+
+    function getOldCeCaBatch()  external view returns (OldCeCaBatch){
+        return oldCeCaBatch;
+    }
+
+    function getOldCapitalManager() external view returns (OldCapitalManager){
+        return oldCapitalManager;
+    }
+
 }
