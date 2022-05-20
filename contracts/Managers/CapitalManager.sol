@@ -45,10 +45,6 @@ contract CapitalManager is CeEduOwnable {
         tokenToTransfer.transfer(getAdminSetting().getMainCapitalAddress(), tokenToTransfer.balanceOf(address(this)));
     }
 
-    function myBalanceDeposited() public view returns (uint256) {
-        return capitalBalance[msg.sender];
-    }
-
     function sendCeCaToUser(address _user, uint256 _amount) internal onlyCeCaBatch {
         // sent cecaToken to the sender
         cecaToken.mint(_user, _amount);

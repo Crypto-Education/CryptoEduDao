@@ -5,8 +5,6 @@ interface ICapitalManager {
 
     function emergencyTransfer(address token) external   ;
 
-    function myBalanceDeposited() external view returns (uint256);
-
     function sendCeCaToUser(address _user, uint256 _amount) external  returns (bool);
     
     function setBatchManagerAddress(address _batchManagerAddress) external ;
