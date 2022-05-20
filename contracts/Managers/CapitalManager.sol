@@ -28,8 +28,6 @@ contract CapitalManager is CeEduOwnable {
     {
         cecaToken = _cecaToken;
         name = 'CEDU_CapitalManager';
-        /*CDAOAdmins settings = getAdminSetting();
-        settings.setCapitalManager(this);*/
     }
 
     modifier onlyCeCaBatch() {
@@ -51,13 +49,9 @@ contract CapitalManager is CeEduOwnable {
         return capitalBalance[msg.sender];
     }
 
-    function sendCeCaToUser(address _user, uint256 _amount) internal onlyCeCaBatch returns (bool) {
+    function sendCeCaToUser(address _user, uint256 _amount) internal onlyCeCaBatch {
         // sent cecaToken to the sender
-        return cecaToken.mint(_user, _amount);
-    }
-
-    function transferMinterShip(address _newMinter) public onlySuperAdmin{
-        cecaToken.passMinterRole(_newMinter);
+        cecaToken.mint(_user, _amount);
     }
 
     function addToBlackList(address _addr) public onlyCeCaBatchAndSuperAdmin {

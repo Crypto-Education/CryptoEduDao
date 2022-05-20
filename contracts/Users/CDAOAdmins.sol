@@ -5,6 +5,8 @@ pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+
+import "../Tokens/CryptoEduDaoToken.sol";
 import "../Managers/Interfaces/IBatchManager.sol";
 import "../Managers/Interfaces/IIdoManager.sol";
 import "../Managers/Interfaces/ICapitalManager.sol";
@@ -36,6 +38,7 @@ contract CDAOAdmins {
     IBatchManager private batchManager;
     IBallotsManager private ballotManager;
     address private migratorV1V2;
+    CryptoEduDaoToken public cryptoEduDaoToken;
 
     /**
         Old contract from V1
@@ -127,6 +130,10 @@ contract CDAOAdmins {
         return capitalToken;
     }
 
+    function getDaoToken() public view returns (CryptoEduDaoToken) {
+        return cryptoEduDaoToken;
+    }
+
     function getTransactionFeesPerBatch() public view returns (uint256){
         return transactionFeesPerBatch;
     }
@@ -179,6 +186,10 @@ contract CDAOAdmins {
 
     function setCapitalToken(IERC20 _addr) public onlySuperAdmin {
         capitalToken = _addr;
+    }
+
+    function setDaoToken(CryptoEduDaoToken _addr) public onlySuperAdmin {
+        cryptoEduDaoToken = _addr;
     }
 
 

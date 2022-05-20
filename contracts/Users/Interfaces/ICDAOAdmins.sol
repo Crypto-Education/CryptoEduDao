@@ -6,6 +6,8 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+
+import "../../Tokens/CryptoEduDaoToken.sol";
 import "../../Managers/Interfaces/IBatchManager.sol";
 import "../../Managers/Interfaces/IIdoManager.sol";
 import "../../Managers/Interfaces/ICapitalManager.sol";
@@ -40,6 +42,8 @@ interface ICDAOAdmins {
     function getMainCapitalAddress() external view returns (address);
     
     function getCapitalToken() external view returns (IERC20);
+    
+    function getDaoToken() external view returns (CryptoEduDaoToken);
 
     function getTransactionFeesPerBatch() external view returns (uint256);
     /**

@@ -1,4 +1,6 @@
 const CECAToken = artifacts.require("CECAToken")
+const CryptoEduDaoToken = artifacts.require("CryptoEduDaoToken")
+
 const FBusd = artifacts.require("FBusd")
 
 const CDAOAdmins = artifacts.require("CDAOAdmins")
@@ -7,6 +9,8 @@ const CapitalManager = artifacts.require("CapitalManager")
 const IdoManager = artifacts.require("IdoManager")
 const BatchManager = artifacts.require("BatchManager")
 const BallotsManager = artifacts.require("BallotsManager")
+const CecaFarming = artifacts.require("CecaFarming")
+
 const MigrationV1V2 = artifacts.require("MigrationV1V2")
 
 
@@ -27,7 +31,10 @@ const addressesList = {
         capitalDeposit: '0x4328335Cbe74D1fC60b5011954076534D7244494',
         idoMainAddress: '0x4328335Cbe74D1fC60b5011954076534D7244494',
         idoBusdAddress: '0x4328335Cbe74D1fC60b5011954076534D7244494',
-        teamAddress: '0x9B3a3Cc32645D845a25e3c07e9EeC02c2528331b'
+        teamAddress: '0x9B3a3Cc32645D845a25e3c07e9EeC02c2528331b',
+        oldCapitalToken: "0xD5A26B2c4856F0eB6d3a8f1237152BACC70d4f31",
+        oldCecaBatch: "0x2db3c0F4172e009d478D399ee12CDBA68875DebE",
+        oldCapitalManager: "0x4c5d6141Ff4BF563779B8547349219804D31Ad68",
     }
 }
 
@@ -36,12 +43,14 @@ const addressesList = {
 module.exports = async function (deployer, network, accounts) {
 
     let cecaToken;
+    let cryptoEduDaoToken;
     let cdaoAdmins;
     let fbusdToken;
     let capitalManager;
     let batchManager
     let idoManager;
     let ballotsManager;
+    let cecaFarming;
     let migrationV1V2;
 
     switch (network) {
@@ -57,11 +66,15 @@ module.exports = async function (deployer, network, accounts) {
             await deployer.deploy(CECAToken)
             cecaToken = await CECAToken.deployed()
 
+            await deployer.deploy(CryptoEduDaoToken)
+            cryptoEduDaoToken = await CryptoEduDaoToken.deployed()
+
+
             await deployer.deploy(FBusd)
             fbusdToken = await FBusd.deployed()
 
             /**
-             * deplo managers
+             * deploy managers
              */
             await deployer.deploy(CapitalManager, cecaToken.address, cdaoAdmins.address)
             capitalManager = await CapitalManager.deployed()
@@ -75,6 +88,9 @@ module.exports = async function (deployer, network, accounts) {
             await deployer.deploy(BallotsManager, cdaoAdmins.address)
             ballotsManager = await BallotsManager.deployed()
 
+            await deployer.deploy(CecaFarming, cdaoAdmins.address)
+            cecaFarming = await CecaFarming.deployed()
+
             await deployer.deploy(MigrationV1V2, cdaoAdmins.address)
             migrationV1V2 = await MigrationV1V2.deployed()
 
@@ -83,7 +99,8 @@ module.exports = async function (deployer, network, accounts) {
              * Settings
              */
             // pass minterShip to Capital Manager
-            await cecaToken.passMinterRole(capitalManager.address, {from: accounts[0]})
+            await cecaToken.grantRole(await cecaToken.MINTER_ROLE(), capitalManager.address, {from: accounts[0]})
+            await cryptoEduDaoToken.grantRole(await cryptoEduDaoToken.MINTER_ROLE(), cecaFarming.address, {from: accounts[0]})
             /**Set accepted tokens Stable coins only */
             await cdaoAdmins.addAcceptedTokens(fbusdToken.address, {from: accounts[0]})
             /**Set Dao Addresses for diferent purpuse */
@@ -93,6 +110,7 @@ module.exports = async function (deployer, network, accounts) {
             await cdaoAdmins.setMainCapitalAddress(addressesList.testnet.capitalDeposit, {from: accounts[0]})
             /**Set token */
             await cdaoAdmins.setCapitalToken(cecaToken.address, {from: accounts[0]})
+            await cdaoAdmins.setDaoToken(cryptoEduDaoToken.address, {from: accounts[0]})
             /**Set managers */
             await cdaoAdmins.setCapitalManagerByAdmin(capitalManager.address, {from: accounts[0]})
             await cdaoAdmins.setIdoManagerByAdmin(idoManager.address, {from: accounts[0]})
@@ -101,9 +119,9 @@ module.exports = async function (deployer, network, accounts) {
             /**Set Migratot Contract */
             await cdaoAdmins.setMigratorV1V2(migrationV1V2.address, {from: accounts[0]})
             /** Set Old contracts for migration from V1 */
-            await cdaoAdmins.setOldCapitalToken(ddressesList.testnet.oldCapitalToken, {from: accounts[0]})
-            await cdaoAdmins.setOldCeCaBatch(ddressesList.testnet.oldCecaBatch, {from: accounts[0]})
-            await cdaoAdmins.setOldCapitalManager(ddressesList.testnet.oldCapitalManager, {from: accounts[0]})
+            await cdaoAdmins.setOldCapitalToken(addressesList.testnet.oldCapitalToken, {from: accounts[0]})
+            await cdaoAdmins.setOldCeCaBatch(addressesList.testnet.oldCecaBatch, {from: accounts[0]})
+            await cdaoAdmins.setOldCapitalManager(addressesList.testnet.oldCapitalManager, {from: accounts[0]})
 
             /**Initialise data contracts */
             await batchManager.createAppendBatch("Batch 0 |Capital Initial", false, {from: accounts[0]})
