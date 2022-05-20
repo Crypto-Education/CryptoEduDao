@@ -1,29 +1,13 @@
-
 const BatchManager = artifacts.require("BatchManager");
+const { async } = require("q");
+const truffleAssert = require("truffle-assertions");
 
 contract("BatchManager", async accounts => {
-  // it("should return the result", () =>
-  // CapitalManager.deployed()
-  //     .then(instance => instance.myBalanceDeposited())
-  //     .then(balance => {
-  //       assert.equal(
-  //         balance.valueOf(),
-  //         10000,
-  //         "The result is ok"
-  //       );
-  //     }));
-  it("TEST BATCH_MANAGER", async () => {
-    const instance = await BatchManager.deployed();
-    console.log(await instance.getBatch(0));
-    console.log(await instance.getBatch(1));
-    console.log(await instance.getBatch(2));
-    
-
-    
-    // const result2 = await instance.getTotalDepositedInAllBatch( {from : accounts[0]});
-    // assert.equal(result2.valueOf(), 50000,'Montant inférieur');
-  });
-
-
- 
+    it("TEST BATCH_MANAGER", async () => {
+      const instance = await BatchManager.deployed();
+      assert.equal(await instance.getBatchListSize(), 2);
+      const result = await instance.createAppendBatch("Batch 3 |Batch test", false, {from: accounts[0]});
+      assert.ok(result.receipt.status)
+      assert.equal(await instance.getBatchListSize(), 3);
+    });
 });
