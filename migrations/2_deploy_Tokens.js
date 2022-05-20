@@ -76,7 +76,7 @@ module.exports = async function (deployer, network, accounts) {
             /**
              * deploy managers
              */
-            await deployer.deploy(CapitalManager, cecaToken.address, cdaoAdmins.address)
+            await deployer.deploy(CapitalManager, cdaoAdmins.address)
             capitalManager = await CapitalManager.deployed()
 
             await deployer.deploy(BatchManager, cdaoAdmins.address)
@@ -124,8 +124,8 @@ module.exports = async function (deployer, network, accounts) {
             await cdaoAdmins.setOldCapitalManager(addressesList.testnet.oldCapitalManager, {from: accounts[0]})
 
             /**Initialise data contracts */
-            await batchManager.createAppendBatch("Batch 0 |Capital Initial", false, {from: accounts[0]})
-            await batchManager.createAppendBatch("Batch 1 |Partisia Blockchain", false, {from: accounts[0]})
+            await batchManager.createAppendBatch("Batch 0 |Capital Initial", true, {from: accounts[0]})
+            await batchManager.createAppendBatch("Batch 1 |Partisia Blockchain", true, {from: accounts[0]})
             
             break;
 

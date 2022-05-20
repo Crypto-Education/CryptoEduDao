@@ -7,7 +7,7 @@ interface IBatchManager {
 
     function createAppendBatch(string memory _name, bool _locked) external returns (bool) ;
 
-    function isBatch() external view returns(bool);
+    function isBatch(address) external view returns(bool);
 
     //Redistribute token cap to old investors
     function redistributeToOldInvestor(address[] memory payees, uint256[] memory shares_) payable external returns(bool);

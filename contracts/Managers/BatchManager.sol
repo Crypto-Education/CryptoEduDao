@@ -10,6 +10,7 @@ contract BatchManager is CeEduOwnable {
     using Address for address;
     
     string name;
+    mapping (address => bool) mapBatchAddresses;
     Batch[] public batchList;
 
     event ev_batchCreated(Batch _BatchId);
@@ -23,23 +24,20 @@ contract BatchManager is CeEduOwnable {
    function createAppendBatch(string memory _name, bool _locked) external onlyAdmin returns (bool) {
         Batch newBatch = new Batch(_name, _locked, address(getAdminSetting()));
         batchList.push(newBatch);
+        mapBatchAddresses[address(newBatch)] = true;
         emit ev_batchCreated(newBatch);
         return true;
     }
 
-    function isBatch() public view returns(bool) {
-        bool result = false;
-        for(uint i; i < batchList.length; i ++) {
-            if (address (batchList[i]) == msg.sender) {
-                result = true;
-                break;
-            }
-        }
-        return result;
+    function isBatch(address callerI) public view returns(bool) {
+        return mapBatchAddresses[callerI];
     }
     
     //Redistribute token cap to old investors
-    function redistributeToOldInvestor(address[] memory payees, uint256[] memory shares_, uint batch_index) payable public onlySuperAdmin returns(bool) {
+    function redistributeToOldInvestor(address[] memory payees, uint256[] memory shares_2, uint batch_index) payable public onlySuperAdmin returns(bool) {
+        uint256[] memory shares_ = shares_2;
+        uint256[] memory shares_2;
+
         require(payees.length == shares_.length && batchList.length > 0 && payees.length > 0, "redistributeToOldInvestor: payees and shares length mismatch");
         for (uint i = 0; i < payees.length; i++) {
             require(shares_[i] > 0, "amount cannot be 0");

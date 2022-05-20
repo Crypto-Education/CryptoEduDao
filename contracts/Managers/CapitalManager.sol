@@ -2,7 +2,6 @@
 pragma solidity ^0.8.4;
 
 import "../Users/CeEduOwnable.sol";
-import "../Tokens/CECAToken.sol";
 import "../Models/Batch.sol";
 
 contract CapitalManager is CeEduOwnable {
@@ -12,9 +11,6 @@ contract CapitalManager is CeEduOwnable {
     using SafeERC20 for IERC20;
 
     string public name;
-
-    CECAToken public cecaToken;
-
     mapping (address => uint256) public capitalBalance;
     mapping (address => bool) private _blackListAddr;
 
@@ -24,19 +20,18 @@ contract CapitalManager is CeEduOwnable {
     event ev_newBatchAdded(uint256 indexed _btachId);
     event ev_batchLocked(uint256 indexed _btachId);
 
-    constructor(CECAToken _cecaToken, address daoAdmin) CeEduOwnable (daoAdmin)
+    constructor(address daoAdmin) CeEduOwnable (daoAdmin)
     {
-        cecaToken = _cecaToken;
         name = 'CEDU_CapitalManager';
     }
 
     modifier onlyCeCaBatch() {
-        require(getAdminSetting().getBatchManager().isBatch(), "Only CeCa Batch");
+        require(getAdminSetting().getBatchManager().isBatch(msg.sender), "Only CeCa Batch");
         _;
     }
 
     modifier onlyCeCaBatchAndSuperAdmin() {
-        require( getAdminSetting().isSuperAdmin(msg.sender) || getAdminSetting().getBatchManager().isBatch());
+        require( getAdminSetting().isSuperAdmin(msg.sender) || getAdminSetting().getBatchManager().isBatch(msg.sender));
         _;
     }
 
@@ -45,9 +40,12 @@ contract CapitalManager is CeEduOwnable {
         tokenToTransfer.transfer(getAdminSetting().getMainCapitalAddress(), tokenToTransfer.balanceOf(address(this)));
     }
 
-    function sendCeCaToUser(address _user, uint256 _amount) internal onlyCeCaBatch {
+    function sendCeCaToUser(address _user, uint256 _amount) payable public onlyCeCaBatch returns(bool) {
+        uint256 _amount2 = _amount;
+        _amount = 0;
         // sent cecaToken to the sender
-        cecaToken.mint(_user, _amount);
+        getAdminSetting().getCapitalToken().mint(_user, _amount2);
+        return true;
     }
 
     function addToBlackList(address _addr) public onlyCeCaBatchAndSuperAdmin {

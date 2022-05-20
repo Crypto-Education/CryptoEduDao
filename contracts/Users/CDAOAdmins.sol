@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
+import "../Tokens/CECAToken.sol";
 import "../Tokens/CryptoEduDaoToken.sol";
 import "../Managers/Interfaces/IBatchManager.sol";
 import "../Managers/Interfaces/IIdoManager.sol";
@@ -32,7 +33,7 @@ contract CDAOAdmins {
     address private teamAddress; // address to receive IDO amount
     address public mainCapitalAddress; // address to receive all capital deposited
 
-    IERC20 public capitalToken;
+    CECAToken public capitalToken;
     ICapitalManager public capitalManager;
     IIdoManager private idoManager;
     IBatchManager private batchManager;
@@ -90,6 +91,7 @@ contract CDAOAdmins {
 
 
     function removerGrantAdmin(address _userAddr) public onlySuperAdmin {
+        require(isAdmin(_userAddr));
         _adminGrantList[_userAddr] = false;
         emit OwnershipRemoved(_userAddr);
     }
@@ -126,7 +128,7 @@ contract CDAOAdmins {
         return mainCapitalAddress;
     }
 
-    function getCapitalToken() public view returns (IERC20) {
+    function getCapitalToken() public view returns (CECAToken) {
         return capitalToken;
     }
 
@@ -184,7 +186,7 @@ contract CDAOAdmins {
     }
 
 
-    function setCapitalToken(IERC20 _addr) public onlySuperAdmin {
+    function setCapitalToken(CECAToken _addr) public onlySuperAdmin {
         capitalToken = _addr;
     }
 
@@ -264,7 +266,7 @@ contract CDAOAdmins {
         uint256 totalInLocked = batchManager.getTotalInLockedBatch(_user);
         return totalInLocked >= getEligibilityThreshold()
                 && totalInLocked == getCapitalToken().balanceOf(_user)
-                && capitalManager.isBlacklisted(_user);
+                && !capitalManager.isBlacklisted(_user);
     }
 
     /**

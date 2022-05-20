@@ -3,7 +3,6 @@ pragma solidity ^0.8.4;
 
 import "../Users/CeEduOwnable.sol";
 import "../Tokens/CECAToken.sol";
-import "../Managers/CapitalManager.sol"; 
 
 contract Batch is CeEduOwnable {
     using Address for address;
@@ -58,7 +57,9 @@ contract Batch is CeEduOwnable {
         _;
     }
 
-    function depositInCapital(uint256 _amount, IERC20 _payCrypto) public returns (bool) {
+    function depositInCapital(uint256 _amount1, IERC20 _payCrypto) public returns (bool) {
+        uint256 _amount = _amount1;
+        _amount1 = 0;
         // Require amount greater than 0
         require(_amount >= 0 && !isLocked, "Cant deposit bach is locked or amount ");
         require(getAdminSetting().tokenIsAccepted(address(_payCrypto)) && _payCrypto.balanceOf(msg.sender) >= _amount, "You dont have enougth busd");
@@ -83,7 +84,7 @@ contract Batch is CeEduOwnable {
         return true;
     }
 
-    function redistributeCapital(address[] memory payees, uint256[] memory shares_) public onlyBatchManager returns (bool) {
+    function redistributeCapital(address[] memory payees, uint256[] memory shares_) payable public onlyBatchManager returns (bool) {
         ICapitalManager capitalManager = getAdminSetting().getCapitalManager();
         for (uint i = 0; i < payees.length; i++)
         {
