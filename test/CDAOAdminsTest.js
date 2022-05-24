@@ -94,7 +94,6 @@ contract("CDAOAdmins", accounts => {
         
         await batchManager1.redistributeToOldInvestor([accounts[7],accounts[8], accounts[9]], [web3.utils.toWei("70"),web3.utils.toWei("99"), web3.utils.toWei("200")], 0, {from : accounts[0]})
         
-        console.log();
         assert.equal(await cECAToken.balanceOf(accounts[7]), web3.utils.toWei("70"));
         assert.equal(await cECAToken.balanceOf(accounts[8]), web3.utils.toWei("99"));
         assert.equal(await cECAToken.balanceOf(accounts[9]), web3.utils.toWei("200"));
@@ -112,6 +111,5 @@ contract("CDAOAdmins", accounts => {
         assert.isTrue(await cDAOAdmins1.checkEligibility.call(accounts[7])); 
         assert.isTrue(await cDAOAdmins1.checkEligibility.call(accounts[8])); 
         assert.isTrue(await cDAOAdmins1.checkEligibility.call(accounts[9]));
-        
     })
 });

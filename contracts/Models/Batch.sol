@@ -162,7 +162,7 @@ contract Batch is CeEduOwnable {
         getAdminSetting().getCapitalManager().addToBlackList(_previousAddr);
     }
     
-    
+    // List of token we participated on IDO for this batch
     function addParticipatedToken(uint256 amount, uint256 unitPrice, address tokenAddr, uint256 idoTimes, bool allClaimed) public onlyAdmin {
         require(tokenInfos[tokenAddr].amount == 0);
         TokenInfo memory newToken = TokenInfo(amount, unitPrice, tokenAddr, idoTimes, allClaimed);
