@@ -45,8 +45,8 @@ contract("Batch", async accounts => {
         const result10 = await instance.addParticipatedToken('50000','2000',fusdDeployed.address,'10000',false, {from : accounts[0]});
         assert.ok(result10.receipt.status,'addParticipatedToken effectué');
 
-         const result11 = await instance.setAllClaimed(fusdDeployed.address,{from : accounts[0]});
-         assert.ok(result11.receipt.status,'setAllClaimed effectué');
+        const result11 = await instance.setAllClaimed(fusdDeployed.address,{from : accounts[0]});
+        assert.ok(result11.receipt.status,'setAllClaimed effectué');
         
     
     });
