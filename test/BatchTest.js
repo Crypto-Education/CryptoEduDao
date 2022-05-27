@@ -103,6 +103,10 @@ contract("Batch", async accounts => {
 
         //   const addParticipatedToken = await batchCreated1.setAllClaimed(fusdDeployed.address,{from : accounts[0]});
         //   assert.ok(addParticipatedToken.receipt.status,'setAllClaimed effectué');
+
+        //const result11 = await instance.setAllClaimed(fusdDeployed.address,{from : accounts[0]});
+        //assert.ok(result11.receipt.status,'setAllClaimed effectué');
+
         
     
     });

@@ -10,10 +10,17 @@ contract("BatchManager", async accounts => {
     // console.log(await instance.getBatch(1));
     // console.log(await instance.getBatch(2));
     
+
   console.log(web3.utils.fromWei(await instance.getBatchListSize()));
   const result1 = await instance.createAppendBatch("BATCH-TEST 3 ",false, {from : accounts[0]});
   console.log(web3.utils.fromWei(await instance.getBatchListSize()));
   assert.ok(result1.receipt.status,'result ok');
+
+    console.log(web3.utils.fromWei(await instance.getBatchListSize()));
+    const result2 = await instance.createAppendBatch("BATCH-TEST 4 ",false, {from : accounts[0]});
+    console.log(web3.utils.fromWei(await instance.getBatchListSize()));
+    assert.ok(result2.receipt.status,'result ok');
+
     
     // assert.equal(web3.utils.fromWei(await instance.getTotalDepositedInAllBatch( {from : accounts[0]})), '50000','Montant inférieur');
     // assert.equal(web3.utils.fromWei(await instance.getTotalInLockedBatch( accounts[0])), 0,'Montant inférieur');
