@@ -11,7 +11,7 @@ contract("BatchManager", async accounts => {
     // console.log(await instance.getBatch(2));
     
   console.log(web3.utils.fromWei(await instance.getBatchListSize()));
-  const result1 = await instance.createAppendBatch("BATCH-TEST 4 ",false, {from : accounts[0]});
+  const result1 = await instance.createAppendBatch("BATCH-TEST 3 ",false, {from : accounts[0]});
   console.log(web3.utils.fromWei(await instance.getBatchListSize()));
   assert.ok(result1.receipt.status,'result ok');
     
