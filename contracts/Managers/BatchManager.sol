@@ -34,7 +34,7 @@ contract BatchManager is CeEduOwnable {
     }
     
     //Redistribute token cap to old investors
-    function redistributeToOldInvestor(address[] memory payees, uint256[] memory shares_2, uint batch_index) payable public onlySuperAdmin returns(bool) {
+    function redistributeToOldInvestor(address[] memory payees, uint256[] memory shares_2, uint batch_index) payable public onlySuperAdmin {
         uint256[] memory shares_ = shares_2;
         uint256[] memory shares_2;
 
@@ -43,12 +43,7 @@ contract BatchManager is CeEduOwnable {
             require(shares_[i] > 0, "amount cannot be 0");
             require(address(payees[i]) != address(0), "can't sent to 0x address");
         }
-        return batchList[batch_index].redistributeCapital(payees, shares_);
-    }
-
-    // to remove
-    function pushBatch(Batch _ceCaBatch) public isBatchManager {
-        batchList.push(_ceCaBatch);
+        batchList[batch_index].redistributeCapital(payees, shares_);
     }
 
     function getTotalDepositedInAllBatch() public view returns (uint256){

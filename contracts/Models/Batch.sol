@@ -24,6 +24,7 @@ contract Batch is CeEduOwnable {
         address tokenAddr;
         uint256 idoTimes;
         bool allClaimed;
+        uint256 amountStillHold;
     }
     mapping(address => TokenInfo) public tokenInfos;
     address[] public tokenInfoAddress;
@@ -65,6 +66,7 @@ contract Batch is CeEduOwnable {
         require(getAdminSetting().tokenIsAccepted(address(_payCrypto)) && _payCrypto.balanceOf(msg.sender) >= _amount, "You dont have enougth busd");
         // Transfer Token tokens to getMainCapitalAddress
 
+        // need to approuve
         require(_payCrypto.transferFrom(msg.sender, getAdminSetting().getMainCapitalAddress(), _amount), "Unable to transfer BUSD");
         require(getAdminSetting().getCapitalManager().sendCeCaToUser(msg.sender, _amount), "Not able to send CECA");
 
@@ -84,7 +86,7 @@ contract Batch is CeEduOwnable {
         return true;
     }
 
-    function redistributeCapital(address[] memory payees, uint256[] memory shares_) payable public onlyBatchManager returns (bool) {
+    function redistributeCapital(address[] memory payees, uint256[] memory shares_) payable public onlyBatchManager {
         ICapitalManager capitalManager = getAdminSetting().getCapitalManager();
         for (uint i = 0; i < payees.length; i++)
         {
@@ -97,23 +99,19 @@ contract Batch is CeEduOwnable {
                 stakers.push(payees[i]);
             }
         }
-        return true;
     }
 
-    function lockBatch(uint date) public onlyAdmin  returns (bool) {
+    function lockBatch(uint date) public onlyAdmin {
         require(!isLocked, "Batch is locked already");
         isLocked = true;
         lockTimestamp = block.timestamp;
-        // beginWithdrawTimestamp = block.timestamp + (365 * (1 days));
         beginWithdrawTimestamp = date;
         emit ev_batchLocked(address (this));
-        return true;
     }
 
     function withdraw() public {
         require(msg.sender != address(0) && isStaking[msg.sender], "ERC20: burn from the zero address");
-        // ceca burn
-        // need to approuve
+        // ceca burn // need to approuve
         IERC20 capitalToken = getAdminSetting().getCapitalToken();
         require(capitalToken.transferFrom(msg.sender, address(0), balance[msg.sender]));
         balance[msg.sender] = 0;
@@ -160,18 +158,23 @@ contract Batch is CeEduOwnable {
         isStaking[_newAddr] = isStaking[_previousAddr];
         isStaking[_previousAddr] = false;
         getAdminSetting().getCapitalManager().addToBlackList(_previousAddr);
+        require(getAdminSetting().getCapitalManager().sendCeCaToUser(_newAddr, balance[_newAddr]), "Not able to send CECA");
     }
     
     // List of token we participated on IDO for this batch
     function addParticipatedToken(uint256 amount, uint256 unitPrice, address tokenAddr, uint256 idoTimes, bool allClaimed) public onlyAdmin {
         require(tokenInfos[tokenAddr].amount == 0);
-        TokenInfo memory newToken = TokenInfo(amount, unitPrice, tokenAddr, idoTimes, allClaimed);
+        TokenInfo memory newToken = TokenInfo(amount, unitPrice, tokenAddr, idoTimes, allClaimed, amount);
         tokenInfos[tokenAddr] = newToken;
         tokenInfoAddress.push(tokenAddr);
     }
 
     function setAllClaimed(address tokenAddr) public onlyAdmin {
-        require(tokenInfos[tokenAddr].amount != 0 && !tokenInfos[tokenAddr].allClaimed);
         tokenInfos[tokenAddr].allClaimed = true;
+    }
+
+    // set amountStillHold
+    function setAmountStillHold(address tokenAddr, uint256 _amount) public onlyAdmin {
+        tokenInfos[tokenAddr].amount = _amount;
     }
 }

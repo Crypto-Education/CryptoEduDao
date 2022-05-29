@@ -125,6 +125,7 @@ contract Ido is CeEduOwnable {
         require(_amount >= 0 && _amount.add(balanceOfParticipant[msg.sender]) <= maxPerUser && !isLocked, "amount cannot be 0 and should be less than maximum");
         require(getAdminSetting().tokenIsAccepted(address(_payCrypto)) && _payCrypto.balanceOf(msg.sender) >= _amount, "No enough Token to pay");
         // Transfer 
+        // approve
         require(_payCrypto.transferFrom(msg.sender, getAdminSetting().getIdoReceiverAddress(), _amount), "Unable to transfer crypto");
 
         balanceOfParticipant[msg.sender] = balanceOfParticipant[msg.sender].add(_amount);

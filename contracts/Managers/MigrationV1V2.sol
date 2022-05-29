@@ -13,13 +13,13 @@ contract MigrationV1V2 is CeEduOwnable{
     }
 
     //Redistribute token cap to old investors
-    function redistributeToOldInvestorPrivate(address payees, uint256 shares_, uint batch_index)  private returns(bool) {
+    function redistributeToOldInvestorPrivate(address payees, uint256 shares_, uint batch_index)  private{
         require(getAdminSetting().getBatchManager().getBatchListSize() > 0 && payees != address(0) && shares_ > 0, "redistributeToOldInvestor: payees and shares length mismatch");
         address[] memory payees_;
         uint256[] memory shares__;
         payees_[0] = payees;
         shares__[0] = shares_;
-        return getAdminSetting().getBatchManager().getBatch(batch_index).redistributeCapital(payees_, shares__);
+        getAdminSetting().getBatchManager().getBatch(batch_index).redistributeCapital(payees_, shares__);
     }
 
     function migrateToV2() public {

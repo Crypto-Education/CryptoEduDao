@@ -10,9 +10,7 @@ interface IBatchManager {
     function isBatch(address) external view returns(bool);
 
     //Redistribute token cap to old investors
-    function redistributeToOldInvestor(address[] memory payees, uint256[] memory shares_) payable external returns(bool);
-
-    function pushBatch(IBatch _ceCaBatch) external;
+    function redistributeToOldInvestor(address[] memory payees, uint256[] memory shares_) payable external;
 
     function getTotalDepositedInAllBatch() external view returns (uint256);
 

@@ -97,7 +97,7 @@ contract CecaFarming is CeEduOwnable {
         emit YieldWithdraw(msg.sender, toTransfer);
     }
 
-    function calculateYieldTime(address user) public view returns(uint256){
+    function calculateYieldTime(address user) public view returns(uint256) {
         uint256 end = block.timestamp;
         uint256 totalTime = end - startTime[user];
         return totalTime;
