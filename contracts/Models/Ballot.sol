@@ -67,7 +67,7 @@ contract Ballot is CeEduOwnable {
     /// Give your vote (including votes delegated to you)
     /// to proposal `proposals[proposal].name`.
     function vote(uint proposal) public isEligibleForIdo {
-        require(!completed, "Vote is completed ");
+        require(!completed && proposal < proposals.length , "Vote is completed or proposal not found");
         Voter storage sender = voters[msg.sender];
         require(!sender.voted, "Already voted.");
         sender.voted = true;

@@ -1,5 +1,5 @@
 const Ballot = artifacts.require("Ballot");
-const BallotManager = artifacts.require("BallotManager");
+const BallotsManager = artifacts.require("BallotsManager");
 const fusd = artifacts.require("FBusd");
 
 contract("Ballot", async accounts => {
@@ -7,17 +7,19 @@ contract("Ballot", async accounts => {
     
     it("TEST BALLOT_CLASS", async () => {
         const fusdDeployed = await fusd.deployed();
-        const ballotManagerDeployed = await BallotManager.deployed();
-       
+        const ballotManagerDeployed = await BallotsManager.deployed();
+        const proposalNames = ['OUI','NON','ABSTENTION'];
+
         // construire un tableau de proposal onlyadmin
-        ballotManagerDeployed.initialiseNewBallot('Ballot TEST 1', proposalNames, {from : accounts[0]});
+        await ballotManagerDeployed.initialiseNewBallot('Ballot TEST 1', proposalNames, {from : accounts[0]});
         
         const ballotCreated1 = await Ballot.at(await ballotManagerDeployed.getBallot.call(0));
         await ballotCreated1.isEligibleForIdo();        
         assert.equal( await ballotCreated1.isEligibleForIdo( {from : accounts[0]}),true,'Ballot elligible');
         //construire la structure proposal
 
-        const vote = await ballotCreated1.vote( proposal);
+        let proposal = 0; // 0 => OUI 1=> NON 2=> ABSTENTION 3=> ERREUR 
+        const vote = await ballotCreated1.vote( proposal, {from : accounts[0]});
         assert.ok(vote.receipt.status,'Vote effectué avec succès');
 
         const winningProposal = await ballotCreated1.winningProposal( proposal, {from : accounts[0]});
