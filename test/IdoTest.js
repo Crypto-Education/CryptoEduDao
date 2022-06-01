@@ -1,14 +1,30 @@
-const Batch = artifacts.require("Batch");
-const BatchManager = artifacts.require("BatchManager");
+const Batch = artifacts.require("Ido");
+const BatchManager = artifacts.require("IdoManagerManager");
 const fusd = artifacts.require("FBusd");
-contract("Batch", async accounts => {
+contract("Ido", async accounts => {
 
     
-    it("TEST BATCH_CLASS", async () => {
+    it("TEST IDO_CLASS", async () => {
         const fusdDeployed = await fusd.deployed();
-        const batchDeployed = await BatchManager.deployed();
+        const idoManagerDeployed = await IdoManager.deployed();
 
-        await batchDeployed.createAppendBatch("Batch 3 |Test Blockchain", false, {from: accounts[0]})
+        await idoManagerDeployed.initialiseNewIdo("IDO 1 |Test Blockchain", web3.utils.toWei("10000"), {from: accounts[0]})
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         
         await batchDeployed.createAppendBatch("Batch 4 |Test Blockchain", false, {from: accounts[0]})
         await batchDeployed.createAppendBatch("Batch 5 |Test Blockchain", false, {from: accounts[0]})
