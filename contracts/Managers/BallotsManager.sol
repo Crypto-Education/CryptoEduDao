@@ -21,4 +21,8 @@ contract BallotsManager is CeEduOwnable{
     function getBallotListSize() public view returns (uint) {
         return ballotsList.length;
     }
+
+    function getBallot(uint index) public view returns(address) {
+        return address(ballotsList[index]);
+    }
 } 

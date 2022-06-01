@@ -9,4 +9,6 @@ interface IIdoManager {
     function getIdoListSize() external view returns (uint);
 
     function transfertMinterShip(address _newMinter) external;
+
+    function getBallot(uint index) external view returns(address);
 }
