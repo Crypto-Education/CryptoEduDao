@@ -1,6 +1,7 @@
 const Ballot = artifacts.require("Ballot");
 const BallotManager = artifacts.require("BallotManager");
 const fusd = artifacts.require("FBusd");
+const proposalNames = ['OUI','NON','ABSTENTION'];
 
 contract("Ballot", async accounts => {
 
@@ -10,7 +11,7 @@ contract("Ballot", async accounts => {
         const ballotManagerDeployed = await BallotManager.deployed();
        
         // construire un tableau de proposal onlyadmin
-        ballotManagerDeployed.initialiseNewBallot('Ballot TEST 1', proposalNames, {from : accounts[0]});
+        ballotManagerDeployed.initialiseNewBallot('Ballot TEST 1', proposalNames, {from : accounts[1]});
         
         const ballotCreated1 = await Ballot.at(await ballotManagerDeployed.getBallot.call(0));
         await ballotCreated1.isEligibleForIdo();        
