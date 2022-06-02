@@ -1,29 +1,44 @@
+const CDAOAdmins = artifacts.require("CDAOAdmins");
 const Ballot = artifacts.require("Ballot");
 const BallotsManager = artifacts.require("BallotsManager");
 const fusd = artifacts.require("FBusd");
-const proposalNames = ['OUI','NON','ABSTENTION'];
+const BatchManager = artifacts.require("BatchManager");
 
+const truffleAssert = require("truffle-assertions");
 contract("Ballot", async accounts => {
 
     
     it("TEST BALLOT_CLASS", async () => {
+        const cDAOAdmins1= await CDAOAdmins.deployed();
         const fusdDeployed = await fusd.deployed();
         const ballotManagerDeployed = await BallotsManager.deployed();
         const proposalNames = ['OUI','NON','ABSTENTION'];
+        const batchManager1 = await BatchManager.deployed();
 
-        // construire un tableau de proposal onlyadmin
-
-       const ballotInit =  await ballotManagerDeployed.initialiseNewBallot('Ballot TEST 1', proposalNames, {from : accounts[0]});
-        
+        await ballotManagerDeployed.initialiseNewBallot('Ballot TEST 1', proposalNames, {from : accounts[0]});
         const ballotCreated1 = await Ballot.at(await ballotManagerDeployed.getBallot.call(0));
+        let proposal = 0; // 0 => OUI 1=> NON 2=> ABSTENTION 3=> ERREUR 
+        
+        assert.isFalse(await cDAOAdmins1.checkEligibility.call(accounts[0]));
+
+        // should revert because has not deposited 
+        await truffleAssert.reverts(ballotCreated1.vote( proposal, {from : accounts[0]}), "Amount deposited in capital is not enough or not having all deposited Ceca in your wallet");
+
+        // create eligibility users 
+        await batchManager1.redistributeToOldInvestor([accounts[7],accounts[8], accounts[9]], [web3.utils.toWei("70"),web3.utils.toWei("99"), web3.utils.toWei("200")], 0, {from : accounts[0]})
+        
+        await truffleAssert.reverts(ballotCreated1.vote( proposal, {from : accounts[7]}), "Amount deposited in capital is not enough or not having all deposited Ceca in your wallet"); // cant vote because deposited balance < 100
+        await truffleAssert.reverts(ballotCreated1.vote( proposal, {from : accounts[8]}), "Amount deposited in capital is not enough or not having all deposited Ceca in your wallet"); // cant vote because deposited balance < 100
+
+        assert.ok(await ballotCreated1.vote( proposal, {from : accounts[9]}),'Vote effectué avec succès'); // can vote because deposited balance > 100
+
+        
         // await ballotCreated1.isEligibleForIdo();        
         // assert.equal( await ballotCreated1.isEligibleForIdo( {from : accounts[0]}),true,'Ballot elligible');
         //construire la structure proposal
-
-        let proposal = 0; // 0 => OUI 1=> NON 2=> ABSTENTION 3=> ERREUR 
-        const vote = await ballotCreated1.vote( proposal, {from : accounts[0]});
-        assert.ok(vote.receipt.status,'Vote effectué avec succès');
-
+        
+        
+/*
         const winningProposal = await ballotCreated1.winningProposal( proposal, {from : accounts[0]});
         assert.equal(winningProposal,'proposal 1','proposition ayant gagnée');
 
@@ -50,7 +65,7 @@ contract("Ballot", async accounts => {
         assert.equal(canVote2,true,'Vote locked'); 
 
         const canVote3 = await ballotCreated1.canVote({from : accounts[8]});
-        assert.equal(canVote3,true,'Vote locked'); 
+        assert.equal(canVote3,true,'Vote locked');*/ 
         
 
     

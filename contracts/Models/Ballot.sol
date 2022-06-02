@@ -55,14 +55,12 @@ contract Ballot is CeEduOwnable {
     }
 
     modifier isEligibleForIdo() {
-        bool checkElig = getAdminSetting().getBatchManager().checkEligibility(msg.sender);
         require(
-            checkElig,
+            getAdminSetting().checkEligibility(msg.sender),
             "Amount deposited in capital is not enough or not having all deposited Ceca in your wallet"
         );
         _;
     }
-
 
     /// Give your vote (including votes delegated to you)
     /// to proposal `proposals[proposal].name`.

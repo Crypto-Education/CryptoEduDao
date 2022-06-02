@@ -18,8 +18,6 @@ interface IBatchManager {
     function getTotalInLockedBatch(address _user) external returns(uint256);
 
     function recoverLostWallet(address _previousAddr, address _newAddr) external;
-
-    function checkEligibility(address _user) external returns (bool);
     
     function getUserWeight(address _user) external returns (uint);
 
