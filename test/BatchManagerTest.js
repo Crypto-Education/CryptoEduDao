@@ -40,7 +40,7 @@ contract("BatchManager", async accounts => {
     await truffleAssert.reverts(batchMDeployed.redistributeToOldInvestor(
       [accounts[1],accounts[2],accounts[3]], 
       [web3.utils.toWei("100"),web3.utils.toWei("100"),web3.utils.toWei("100")], 
-      5, 
+      0, 
       {from: accounts[1]}
       )); // is not super admin 
 
