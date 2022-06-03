@@ -58,11 +58,10 @@ contract Ido is CeEduOwnable {
         tokenAddress = _tokenAddress;
         numberOfTokenFromIdo = _numberOfToken;
         priceSpentForToken = _totalAmountSpent;
-        uint256 totalWeight = getSumOfAllWeight();
-        idoTotalWeight = totalWeight;
+        idoTotalWeight = getSumOfAllWeight();
         // redistribute the extra deposited 
         for (uint i = 0; i < stakers.length; i++) {
-            uint256 amountPerUser = priceSpentForToken.div(totalWeight).mul(weightOfParticipant[stakers[i]]).add(getAdminSetting().getTransactionFeesPerBatch());
+            uint256 amountPerUser = priceSpentForToken.div(idoTotalWeight).mul(weightOfParticipant[stakers[i]]).add(getAdminSetting().getTransactionFeesPerBatch());
             if (balanceOfParticipant[stakers[i]] > amountPerUser) {
                 // send back extra busd
                 _payCrypto.transfer(

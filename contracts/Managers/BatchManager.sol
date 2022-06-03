@@ -6,7 +6,6 @@ import "../Models/Batch.sol";
 
 
 contract BatchManager is CeEduOwnable {
-    using SafeMath for uint256;
     using Address for address;
     
     string name;
@@ -17,16 +16,13 @@ contract BatchManager is CeEduOwnable {
     constructor(address daoAdmin) CeEduOwnable (daoAdmin)
     {
         name = 'CEDU_BatchManager';
-        /*CDAOAdmins settings = getAdminSetting();
-        settings.setBatchManager(this);*/
     }
 
-   function createAppendBatch(string memory _name, bool _locked) external onlyAdmin returns (bool) {
+   function createAppendBatch(string memory _name, bool _locked) external onlyAdmin {
         Batch newBatch = new Batch(_name, _locked, address(getAdminSetting()));
         batchList.push(newBatch);
         mapBatchAddresses[address(newBatch)] = true;
         emit ev_batchCreated(newBatch);
-        return true;
     }
 
     function isBatch(address callerI) public view returns(bool) {
@@ -35,10 +31,8 @@ contract BatchManager is CeEduOwnable {
     
     //Redistribute token cap to old investors
     function redistributeToOldInvestor(address[] memory payees, uint256[] memory shares_2, uint batch_index) payable public onlySuperAdmin {
+        require(payees.length == shares_2.length && batchList.length > 0 && payees.length > 0 && batch_index < batchList.length, "redistributeToOldInvestor: mismatch");
         uint256[] memory shares_ = shares_2;
-        uint256[] memory shares_2;
-
-        require(payees.length == shares_.length && batchList.length > 0 && payees.length > 0, "redistributeToOldInvestor: payees and shares length mismatch");
         for (uint i = 0; i < payees.length; i++) {
             require(shares_[i] > 0, "amount cannot be 0");
             require(address(payees[i]) != address(0), "can't sent to 0x address");
@@ -49,7 +43,7 @@ contract BatchManager is CeEduOwnable {
     function getTotalDepositedInAllBatch() public view returns (uint256){
         uint256 sum = 0;
         for (uint i = 0; i < batchList.length; i++) {
-            sum = sum.add(batchList[i].totalDeposited());
+            sum += batchList[i].totalDeposited();
         }
         return sum;
     }
@@ -58,14 +52,14 @@ contract BatchManager is CeEduOwnable {
         return batchList[index];
     }
 
-    function getBatchListSize() public view returns (uint) {
+    function getBatchListSize() public view returns(uint) {
         return batchList.length;
     }
     
     function getTotalInLockedBatch(address _user) public view returns(uint256) {
         uint256 totalInLockedBatch = 0;
         for (uint i = 0; i < batchList.length; i++) {
-            totalInLockedBatch = totalInLockedBatch.add(batchList[i].myDepositedInBatchForUser(_user, true));
+            totalInLockedBatch += batchList[i].myDepositedInBatchForUser(_user, true);
         }
         return totalInLockedBatch;
     }
@@ -78,7 +72,6 @@ contract BatchManager is CeEduOwnable {
     
     function getUserWeight(address _user) public view returns (uint) {
         // get more allocation of has deposited way more earlier
-        uint256 totalInLockedBatch = getTotalInLockedBatch(_user);
-        return totalInLockedBatch.div(1 ether).div(100);
+        return getTotalInLockedBatch(_user) * 100 / getTotalDepositedInAllBatch();
     }
 }

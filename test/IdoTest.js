@@ -1,5 +1,5 @@
 const Batch = artifacts.require("Ido");
-const BatchManager = artifacts.require("IdoManagerManager");
+const IdoManager = artifacts.require("IdoManager");
 const fusd = artifacts.require("FBusd");
 contract("Ido", async accounts => {
 
