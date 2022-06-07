@@ -182,4 +182,5 @@ contract Ido is CeEduOwnable {
     function setMaxUser(uint256 max) public onlyAdmin {
         maxPerUser = max;
     }
+    
 }

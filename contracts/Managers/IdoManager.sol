@@ -39,4 +39,9 @@ contract IdoManager is CeEduOwnable {
     function transfertMinterShip(address _newMinter) public onlySuperAdmin {
         getAdminSetting().getCapitalManager().transferMinterShip(_newMinter);
     }
+    
+
+    function getIdo(uint index) public view returns(address) {
+        return address(idoInformationList[index]);
+    }
 }
