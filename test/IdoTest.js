@@ -108,7 +108,7 @@ it("SET TOKEN", async () => {
 
   //tous les comptes sont éligibles pour voter
   assert.isFalse(await cDAOAdmins1.checkEligibility.call(accounts[3]));
-  await truffleAssert.reverts(await batchManagerDeployed.createAppendBatch("Batch 1 |Test ido ", false, {from: accounts[0]}));
+  truffleAssert.reverts(await batchManagerDeployed.createAppendBatch("Batch 1 |Test ido ", false, {from: accounts[0]}));
     
   const batchCreated1 = await Batch.at(await batchManagerDeployed.getBatch.call(3));
     //personne ayant déposer le capital
@@ -118,9 +118,8 @@ it("SET TOKEN", async () => {
   // set setIdoToken
   
   //depositForIdo
- // await truffleAssert.reverts(ballotCreated1.vote( proposal, {from : accounts[7]}), "Amount deposited in capital is not enough or not having all deposited Ceca in your wallet"); // cant vote because deposited balance < 100
-
-  await Assert.ok(idoCreated1.setIdoToken(accounts[1], web3.utils.toWei("450"),batchCreated1.address, {from: accounts[4]})," IDO NOT SET"); 
+  //await Assert.ok(idoCreated1.setIdoToken(accounts[1], web3.utils.toWei("450"),batchCreated1.address, {from: accounts[4]})," IDO NOT SET"); 
+  await truffleAssert.reverts(idoCreated1.setIdoToken(accounts[1], web3.utils.toWei("450"),batchCreated1.address, {from: accounts[4]})); 
  
   await truffleAssert.reverts(idoCreated1.redistributeIdoToken({from: accounts[0]})); 
  
