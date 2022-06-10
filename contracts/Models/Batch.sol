@@ -54,7 +54,7 @@ contract Batch is CeEduOwnable {
     modifier onlyBatchManager() {
         require(msg.sender == address (getAdminSetting().getBatchManager())
             || msg.sender == getAdminSetting().getMigratorV1V2()
-        , "");
+        , "Not Manager Contract");
         _;
     }
 
@@ -86,7 +86,7 @@ contract Batch is CeEduOwnable {
         return true;
     }
 
-    function redistributeCapital(address[] memory payees, uint256[] memory shares_) payable public onlyBatchManager {
+    function redistributeCapital(address[] memory payees, uint256[] memory shares_) public onlyBatchManager {
         ICapitalManager capitalManager = getAdminSetting().getCapitalManager();
         for (uint i = 0; i < payees.length; i++)
         {

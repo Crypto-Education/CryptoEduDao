@@ -121,8 +121,8 @@ contract Ido is CeEduOwnable {
 
     function depositForIdo(uint256 _amount, IERC20 _payCrypto) public isEligibleForIdo returns (bool)  {
         // Require amount greater than 0
-        require(_amount >= 0 && _amount.add(balanceOfParticipant[msg.sender]) <= maxPerUser && !isLocked, "amount cannot be 0 and should be less than maximum");
         require(getAdminSetting().tokenIsAccepted(address(_payCrypto)) && _payCrypto.balanceOf(msg.sender) >= _amount, "No enough Token to pay");
+        require(_amount >= 0 && _amount.add(balanceOfParticipant[msg.sender]) <= maxPerUser && !isLocked, "amount cannot be 0 and should be less than maximum");
         // Transfer 
         // approve
         require(_payCrypto.transferFrom(msg.sender, getAdminSetting().getIdoReceiverAddress(), _amount), "Unable to transfer crypto");
@@ -182,5 +182,4 @@ contract Ido is CeEduOwnable {
     function setMaxUser(uint256 max) public onlyAdmin {
         maxPerUser = max;
     }
-    
 }
