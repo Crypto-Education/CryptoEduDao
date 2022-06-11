@@ -88,10 +88,11 @@ it("DEPOSIT", async () => {
   assert.ok(await fusdDeployed.approve(idoCreated1.address, web3.utils.toWei("10000000000"), {from: accounts[1]}))
   // max c'est 10
   await truffleAssert.reverts(idoCreated1.depositForIdo(web3.utils.toWei("50"), fusd.address, {from: accounts[1]}), "amount cannot be 0 and should be less than maximum") // on peut pas deposer plus que le max qui a ete defini
-  assert.ok(idoCreated1.depositForIdo(web3.utils.toWei("3"), fusd.address, {from: accounts[1]})); // manque 7
+  assert.ok(await idoCreated1.depositForIdo(web3.utils.toWei("3"), fusd.address, {from: accounts[1]})); // manque 7
+
   await truffleAssert.reverts(idoCreated1.depositForIdo(web3.utils.toWei("8"), fusd.address, {from: accounts[1]})) // on peut pas deposer plus que le max qui a ete defini
-  assert.ok(idoCreated1.depositForIdo(web3.utils.toWei("7"), fusd.address, {from: accounts[1]})); // manque 3
-  
+  assert.ok(await idoCreated1.depositForIdo(web3.utils.toWei("7"), fusd.address, {from: accounts[1]})); // manque 0
+
   //pas besoin de redistribuer a chanque fois deja fait dans le it precedant 
   //await batchManagerDeployed.redistributeToOldInvestor([accounts[1],accounts[2],accounts[3],accounts[4],accounts[5],accounts[7],accounts[8], accounts[9]], [web3.utils.toWei("550"),web3.utils.toWei("450"),web3.utils.toWei("350"),web3.utils.toWei("800"),web3.utils.toWei("780"),web3.utils.toWei("70"),web3.utils.toWei("99"), web3.utils.toWei("200")], 0, {from : accounts[0]})
  
@@ -108,6 +109,9 @@ it("DEPOSIT", async () => {
 // can not deposit in locked ido
   //await assert.ok(idoCreated1.depositForIdo(web3.utils.toWei("8"), fusd.address,{from: accounts[1]}), "can not deposit in ido locked"); 
  
+  
+  assert.equal(await idoCreated1.getSumOfAllWeight({from: accounts[0]}), 5); 
+  assert.equal(await idoCreated1.myDepositedInIdo({from: accounts[1]}), web3.utils.toWei("10")); 
  
 }); 
 it("SET TOKEN", async () => {
@@ -161,25 +165,11 @@ it("SET TOKEN", async () => {
  
   //await truffleAssert.reverts(idoCreated1.redistributeIdoToken({from: accounts[0]})); 
  
-  //await assert.equal(idoCreated1.getSumOfAllWeight({from: accounts[0]}),"500"," Amount not equals"); 
-  
-  //await assert.equal(idoCreated1.myDepositedInIdo({from: accounts[9]}),"500"); 
-  truffleAssert.reverts(await idoCreated1.depositForIdo(web3.utils.toWei("5"), fusd.address, {from: accounts[9]})); // manque 7
-  
- 
+  await truffleAssert.reverts(idoCreated1.emergencyTransfer(fusd.address,{from: accounts[1]})); 
+  await truffleAssert.reverts(idoCreated1.emergencyTransfer(fusd.address,{from: accounts[3]}));  
+  await truffleAssert.reverts(idoCreated1.emergencyTransfer(fusd.address,{from: accounts[6]})); 
   await truffleAssert.reverts(idoCreated1.emergencyTransfer(fusd.address,{from: accounts[8]})); 
- 
-  await truffleAssert.reverts(idoCreated1.emergencyTransfer(fusd.address,{from: accounts[3]})); 
- 
-  await assert.ok(idoCreated1.emergencyTransfer(fusd.address,{from: accounts[9]})); 
- 
-  await assert.ok(idoCreated1.emergencyTransfer(fusd.address,{from: accounts[1]})); 
- 
-  truffleAssert.reverts(idoCreated1.emergencyTransfer(fusd.address,{from: accounts[6]})); 
-  await truffleAssert.reverts(idoCreated1.myDepositedInIdo({from: accounts[3]})); 
- 
-  
-  
+  await truffleAssert.reverts(idoCreated1.emergencyTransfer(fusd.address,{from: accounts[9]}));
 
 }); 
     
