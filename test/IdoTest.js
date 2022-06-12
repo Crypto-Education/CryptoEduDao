@@ -160,7 +160,8 @@ it("SET TOKEN", async () => {
   
   assert.ok(await fusdDeployed.approve(idoCreated1.address, web3.utils.toWei("10000000000"), {from: accounts[9]}))
   
-  //await assert.ok(idoCreated1.setIdoToken(accounts[3], web3.utils.toWei("450"),fusdDeployed.address, {from: accounts[4]})); 
+  await truffleAssert.reverts(idoCreated1.setIdoToken(fusdDeployed.address, web3.utils.toWei("45.5"), web3.utils.toWei("10.86"),fusdDeployed.address, {from: accounts[4]})); 
+  assert.ok(await idoCreated1.setIdoToken(fusdDeployed.address, web3.utils.toWei("45.5"), web3.utils.toWei("10.86"),fusdDeployed.address, {from: accounts[0]})); 
 
  
   //await truffleAssert.reverts(idoCreated1.redistributeIdoToken({from: accounts[0]})); 

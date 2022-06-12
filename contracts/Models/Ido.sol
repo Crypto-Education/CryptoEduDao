@@ -52,7 +52,7 @@ contract Ido is CeEduOwnable {
         }
         return false;
     }
-    function setIdoToken(address _tokenAddress, uint256 _numberOfToken, uint256 _totalAmountSpent,IERC20 _payCrypto) public onlyAdmin {
+    function setIdoToken(address _tokenAddress, uint256 _numberOfToken, uint256 _totalAmountSpent, IERC20 _payCrypto) public onlyAdmin {
         require(isLocked && priceSpentForToken == 0, "Ido should be locked or Price is already set");
         require(getAdminSetting().tokenIsAccepted(address(_payCrypto)), "No enough Token to pay");
         tokenAddress = _tokenAddress;
@@ -90,7 +90,9 @@ contract Ido is CeEduOwnable {
         
         uint256 thisAddressBalance = tokenToTransfer.balanceOf(address(this));
 
-        require(remainingToDistribute > 0 && thisAddressBalance > 0, "not enogth to redistribute");
+        if (thisAddressBalance == 0) {
+            return;
+        }
         // no need to approve because tokens are in this contract
         
         if (thisAddressBalance <= remainingToDistribute) {
