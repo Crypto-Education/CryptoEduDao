@@ -89,7 +89,8 @@ it("DEPOSIT", async () => {
   // max c'est 10
   await truffleAssert.reverts(idoCreated1.depositForIdo(web3.utils.toWei("50"), fusd.address, {from: accounts[1]}), "amount cannot be 0 and should be less than maximum") // on peut pas deposer plus que le max qui a ete defini
   assert.ok(await idoCreated1.depositForIdo(web3.utils.toWei("3"), fusd.address, {from: accounts[1]})); // manque 7
-
+  assert.equal(await idoCreated1.myDepositedInIdo({from: accounts[1]}), web3.utils.toWei("3")); 
+  
   await truffleAssert.reverts(idoCreated1.depositForIdo(web3.utils.toWei("8"), fusd.address, {from: accounts[1]})) // on peut pas deposer plus que le max qui a ete defini
   assert.ok(await idoCreated1.depositForIdo(web3.utils.toWei("7"), fusd.address, {from: accounts[1]})); // manque 0
 
@@ -160,11 +161,12 @@ it("SET TOKEN", async () => {
   
   assert.ok(await fusdDeployed.approve(idoCreated1.address, web3.utils.toWei("10000000000"), {from: accounts[9]}))
   
-  await truffleAssert.reverts(idoCreated1.setIdoToken(fusdDeployed.address, web3.utils.toWei("45.5"), web3.utils.toWei("10.86"),fusdDeployed.address, {from: accounts[4]})); 
+  await truffleAssert.reverts(idoCreated1.setIdoToken(fusdDeployed.address, web3.utils.toWei("45.5"), web3.utils.toWei("10.86"),fusdDeployed.address, {from: accounts[4]})); // seulemet un admin ou un super admin peuvent
   assert.ok(await idoCreated1.setIdoToken(fusdDeployed.address, web3.utils.toWei("45.5"), web3.utils.toWei("10.86"),fusdDeployed.address, {from: accounts[0]})); 
+  await truffleAssert.reverts(idoCreated1.setIdoToken(fusdDeployed.address, web3.utils.toWei("45.5"), web3.utils.toWei("10.86"),fusdDeployed.address, {from: accounts[0]}));  // on ne peut pas set 2 fois 
 
  
-  //await truffleAssert.reverts(idoCreated1.redistributeIdoToken({from: accounts[0]})); 
+  assert.ok(await idoCreated1.redistributeIdoToken({from: accounts[0]})); 
  
   await truffleAssert.reverts(idoCreated1.emergencyTransfer(fusd.address,{from: accounts[1]})); 
   await truffleAssert.reverts(idoCreated1.emergencyTransfer(fusd.address,{from: accounts[3]}));  
