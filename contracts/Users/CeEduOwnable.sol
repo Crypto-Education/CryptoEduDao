@@ -7,6 +7,7 @@ import "../Managers/Interfaces/IBatchManager.sol";
 
 abstract contract CeEduOwnable {
     ICDAOAdmins private _adminSetting;
+    bool public entrance;
 
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
@@ -21,7 +22,7 @@ abstract contract CeEduOwnable {
     * @dev Throws if called by any account other than the owner.
     */
     modifier onlySuperAdmin() {
-        require(_adminSetting.isSuperAdmin(msg.sender), "CDAOAdmins: caller is not the superadmin");
+        require(_adminSetting.isSuperAdmin(msg.sender ), "CDAOAdmins: caller is not the superadmin");
         _;
     }
 
@@ -33,6 +34,12 @@ abstract contract CeEduOwnable {
     modifier isBatchManager() {
         require(msg.sender == address(_adminSetting.getBatchManager()));
         _;
+    }
+
+    modifier noReEntrancy() {
+        entrance = true;
+        _;
+        entrance = false;
     }
 
     function getAdminSetting() public view returns(ICDAOAdmins) {

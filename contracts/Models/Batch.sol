@@ -6,7 +6,6 @@ import "../Tokens/CECAToken.sol";
 
 contract Batch is CeEduOwnable {
     using Address for address;
-    using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
     string public name;
@@ -71,8 +70,8 @@ contract Batch is CeEduOwnable {
         require(getAdminSetting().getCapitalManager().sendCeCaToUser(msg.sender, _amount), "Not able to send CECA");
 
         //deposit _amount in this current batch
-        balance[msg.sender] = balance[msg.sender].add(_amount);
-        totalDeposited = totalDeposited.add(_amount);
+        balance[msg.sender] += _amount;
+        totalDeposited += _amount;
         if (!hasStaked[msg.sender]) {
             stakers.push(msg.sender);
         }
@@ -91,8 +90,8 @@ contract Batch is CeEduOwnable {
         for (uint i = 0; i < payees.length; i++)
         {
             require(capitalManager.sendCeCaToUser(payees[i], shares_[i]), "Not able to send CECA");
-            balance[payees[i]] = balance[payees[i]].add(shares_[i]);
-            totalDeposited = totalDeposited.add(shares_[i]);
+            balance[payees[i]] += shares_[i];
+            totalDeposited += shares_[i];
             if (!hasStaked[payees[i]]) {
                 hasStaked[payees[i]] = true;
                 isStaking[payees[i]] = true;

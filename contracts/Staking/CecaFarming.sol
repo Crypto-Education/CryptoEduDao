@@ -4,7 +4,6 @@
 
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "../Users/CeEduOwnable.sol";
 
@@ -12,7 +11,6 @@ contract CecaFarming is CeEduOwnable {
     
     // Library usage
     using SafeERC20 for IERC20;
-    using SafeMath for uint256;
 
     bool internal locked;
     uint256 rate;
@@ -39,7 +37,7 @@ contract CecaFarming is CeEduOwnable {
 
     constructor(address daoAdmin) CeEduOwnable (daoAdmin) {}
 
-    function stake(uint256 amount) public notIsLocked{
+    function stake(uint256 amount) public notIsLocked noReEntrancy{
         require(
             amount > 0 &&
             getAdminSetting().getCapitalToken().balanceOf(msg.sender) >= amount, 
@@ -47,13 +45,13 @@ contract CecaFarming is CeEduOwnable {
             
         if(isStaking[msg.sender] == true){
             uint256 toTransfer = calculateYieldTotal(msg.sender);
-            tokenBalance[msg.sender] = tokenBalance[msg.sender].add(toTransfer);
+            tokenBalance[msg.sender] += toTransfer;
         } else {
             isStaking[msg.sender] = true;
         }
 
         getAdminSetting().getCapitalToken().transferFrom(msg.sender, address(this), amount);
-        stakingBalance[msg.sender] = stakingBalance[msg.sender].add(amount);
+        stakingBalance[msg.sender] += amount;
         startTime[msg.sender] = block.timestamp;
         emit Stake(msg.sender, amount);
     }
@@ -68,7 +66,7 @@ contract CecaFarming is CeEduOwnable {
         startTime[msg.sender] = block.timestamp; // bug fix
         uint256 balanceTransfer = amount;
         amount = 0;
-        stakingBalance[msg.sender] = stakingBalance[msg.sender].sub(balanceTransfer);
+        stakingBalance[msg.sender] += balanceTransfer;
         getAdminSetting().getCapitalToken().transfer(msg.sender, balanceTransfer);
         withdrawYield();
         if(stakingBalance[msg.sender] == 0) {
@@ -105,7 +103,7 @@ contract CecaFarming is CeEduOwnable {
 
     function calculateYieldTotal(address user) public view returns(uint256) {
         uint256 time = calculateYieldTime(user);
-        return rate.div(100).mul(stakingBalance[user]).div(365 days).mul(time);
+        return rate / 100 * stakingBalance[user] / 365 days * time;
     } 
 
     /// @dev Transfer accidentally locked ERC20 tokens.

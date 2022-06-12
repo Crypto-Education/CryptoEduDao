@@ -6,8 +6,6 @@ import "../Models/Batch.sol";
 
 contract CapitalManager is CeEduOwnable {
     using Address for address;
-    using SafeMath for uint256;
-    using SafeMath for uint128;
     using SafeERC20 for IERC20;
 
     string public name;

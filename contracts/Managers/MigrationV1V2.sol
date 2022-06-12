@@ -6,7 +6,6 @@ import "../Users/CeEduOwnable.sol";
 
 contract MigrationV1V2 is CeEduOwnable{
     using Address for address;
-    using SafeMath for uint256;
 
     constructor(address daoAdmin) CeEduOwnable(daoAdmin) {
 
@@ -34,13 +33,13 @@ contract MigrationV1V2 is CeEduOwnable{
             }
             uint256 depositedInOld = getAdminSetting().getOldCapitalManager().batchList(i).getListOfParticipant(msg.sender);
             uint256 depositedInNew = getAdminSetting().getBatchManager().getBatch(i).getBalance(msg.sender);
-            uint256 toDistribute = depositedInOld.sub(depositedInNew);
+            uint256 toDistribute = depositedInOld - depositedInNew;
             if (toDistribute > oldBalance) {
                 toDistribute = oldBalance;
             }
             if (toDistribute > 0) {
                 redistributeToOldInvestorPrivate(msg.sender, toDistribute, i);
-                oldBalance = oldBalance.sub(toDistribute); 
+                oldBalance -= toDistribute; 
             }
             require(oldBalance > 0, "Balance of Old Ceca is less than 0");
         }

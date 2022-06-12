@@ -28,10 +28,10 @@ const addressesList = {
     },
     testnet : {
         busd: '0xe9e7cea3dedca5984780bafc599bd69add087d56',
-        capitalDeposit: '0x4328335Cbe74D1fC60b5011954076534D7244494',
-        idoMainAddress: '0x4328335Cbe74D1fC60b5011954076534D7244494',
-        idoBusdAddress: '0x4328335Cbe74D1fC60b5011954076534D7244494',
-        teamAddress: '0x9B3a3Cc32645D845a25e3c07e9EeC02c2528331b',
+        capitalDeposit: '0x9E40B211e5338AAe4044F006c05e6Fa94755a3ED', // account 9
+        idoMainAddress: '0x9E40B211e5338AAe4044F006c05e6Fa94755a3ED',
+        idoBusdAddress: '0x9E40B211e5338AAe4044F006c05e6Fa94755a3ED',
+        teamAddress   : '0x9E40B211e5338AAe4044F006c05e6Fa94755a3ED',
         oldCapitalToken: "0xD5A26B2c4856F0eB6d3a8f1237152BACC70d4f31",
         oldCecaBatch: "0x2db3c0F4172e009d478D399ee12CDBA68875DebE",
         oldCapitalManager: "0x4c5d6141Ff4BF563779B8547349219804D31Ad68",

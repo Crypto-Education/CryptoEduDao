@@ -153,11 +153,11 @@ it("SET TOKEN", async () => {
   
   assert.ok(await fusdDeployed.approve(idoCreated1.address, web3.utils.toWei("10000000000"), {from: accounts[3]}))
   
-  assert.ok(await fusdDeployed.transfer(accounts[7], web3.utils.toWei("500")), {from: accounts[0]}) // on lui envoie 100 FUSD donc le compte 1 peut deposer 
+  assert.ok(await fusdDeployed.transfer(accounts[7], web3.utils.toWei("500"), {from: accounts[0]})) // on lui envoie 100 FUSD donc le compte 1 peut deposer 
   
   assert.ok(await fusdDeployed.approve(idoCreated1.address, web3.utils.toWei("10000000000"), {from: accounts[7]}))
   
-  assert.ok(await fusdDeployed.transfer(accounts[9], web3.utils.toWei("500")), {from: accounts[0]}) // on lui envoie 100 FUSD donc le compte 1 peut deposer 
+  assert.ok(await fusdDeployed.transfer(accounts[9], web3.utils.toWei("500"), {from: accounts[0]})) // on lui envoie 100 FUSD donc le compte 1 peut deposer 
   
   assert.ok(await fusdDeployed.approve(idoCreated1.address, web3.utils.toWei("10000000000"), {from: accounts[9]}))
   
@@ -165,15 +165,25 @@ it("SET TOKEN", async () => {
   assert.ok(await idoCreated1.setIdoToken(fusdDeployed.address, web3.utils.toWei("45.5"), web3.utils.toWei("10.86"),fusdDeployed.address, {from: accounts[0]})); 
   await truffleAssert.reverts(idoCreated1.setIdoToken(fusdDeployed.address, web3.utils.toWei("45.5"), web3.utils.toWei("10.86"),fusdDeployed.address, {from: accounts[0]}));  // on ne peut pas set 2 fois 
 
- 
   assert.ok(await idoCreated1.redistributeIdoToken({from: accounts[0]})); 
  
   await truffleAssert.reverts(idoCreated1.emergencyTransfer(fusd.address,{from: accounts[1]})); 
   await truffleAssert.reverts(idoCreated1.emergencyTransfer(fusd.address,{from: accounts[3]}));  
-  await truffleAssert.reverts(idoCreated1.emergencyTransfer(fusd.address,{from: accounts[6]})); 
-  await truffleAssert.reverts(idoCreated1.emergencyTransfer(fusd.address,{from: accounts[8]})); 
-  await truffleAssert.reverts(idoCreated1.emergencyTransfer(fusd.address,{from: accounts[9]}));
+  // donne le froit admin a un user 
+  await cDAOAdmins1.grantAdmin(accounts[2], {from : accounts[0]});
+  await truffleAssert.reverts(idoCreated1.emergencyTransfer(fusd.address,{from: accounts[2]}));
+  
+  assert.ok(await idoCreated1.emergencyTransfer(fusd.address,{from: accounts[0]}));
+  await fusdDeployed.transfer(idoCreated1.address, web3.utils.toWei("500"), {from: accounts[0]})
+  assert.equal(web3.utils.fromWei(await fusdDeployed.balanceOf(accounts[9])), 510);
+  assert.ok(await idoCreated1.emergencyTransfer(fusd.address,{from: accounts[0]}));
+
+  assert.equal(web3.utils.fromWei(await fusdDeployed.balanceOf(accounts[9])), 1010);
 
 }); 
+
+it ("Test redistributeIdoToken", async()=> {
+
+})
     
   });

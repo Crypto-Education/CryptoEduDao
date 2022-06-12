@@ -16,8 +16,6 @@ contract IdoManager is CeEduOwnable {
 
     constructor(address daoAdmin) CeEduOwnable (daoAdmin) {
         name = 'CEDU_IdoCryptoEduManager';
-        /*CDAOAdmins settings = getAdminSetting();
-        settings.setIdoManager(this);*/
     }
 
     function initialiseNewIdo(string memory _name, uint256 _maxPerUser) public onlyAdmin returns (bool) {
@@ -35,11 +33,6 @@ contract IdoManager is CeEduOwnable {
     function getIdoListSize() public view returns (uint) {
         return idoInformationList.length;
     }
-
-    function transfertMinterShip(address _newMinter) public onlySuperAdmin {
-        getAdminSetting().getCapitalManager().transferMinterShip(_newMinter);
-    }
-    
 
     function getIdo(uint index) public view returns(address) {
         return address(idoInformationList[index]);

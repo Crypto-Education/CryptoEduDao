@@ -5,14 +5,13 @@ import "../Users/CeEduOwnable.sol";
 
 contract Ido is CeEduOwnable {
     using Address for address;
-    using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
     uint256 public totalDeposited;
     uint256 public numberOfTokenFromIdo;
     uint256 public numberOfTokenDistributed;
     uint256 public idoTotalWeight;
-    address public tokenAddress;
+    IERC20 public tokenToTransfer;
     string public name;
     uint256 public openedTimestamp;
     uint256 public lockTimestamp;
@@ -25,7 +24,7 @@ contract Ido is CeEduOwnable {
     mapping (address => uint256) public balanceOfParticipant;
     mapping (address => uint) public weightOfParticipant;
 
-    event tokenAddressSet(address indexed _idoId, address _tokenAddress);
+    event tokenAddressSet(address indexed _idoId, IERC20 _tokenAddress);
     event idoDepositLocked(address indexed _idoId);
     event idoNewIdoAdded(address indexed _idoId);
 
@@ -52,41 +51,42 @@ contract Ido is CeEduOwnable {
         }
         return false;
     }
-    function setIdoToken(address _tokenAddress, uint256 _numberOfToken, uint256 _totalAmountSpent, IERC20 _payCrypto) public onlyAdmin {
+    function setIdoToken(IERC20 _token, uint256 _numberOfToken, uint256 _totalAmountSpent, IERC20 _payCrypto) public noReEntrancy onlyAdmin {
         require(isLocked && priceSpentForToken == 0, "Ido should be locked or Price is already set");
         require(getAdminSetting().tokenIsAccepted(address(_payCrypto)), "No enough Token to pay");
-        tokenAddress = _tokenAddress;
+        tokenToTransfer = _token;
         numberOfTokenFromIdo = _numberOfToken;
         priceSpentForToken = _totalAmountSpent;
         idoTotalWeight = getSumOfAllWeight();
+
         // redistribute the extra deposited 
         for (uint i = 0; i < stakers.length; i++) {
-            uint256 amountPerUser = priceSpentForToken.div(idoTotalWeight).mul(weightOfParticipant[stakers[i]]).add(getAdminSetting().getTransactionFeesPerBatch());
+            // 
+            uint256 amountPerUser = ((priceSpentForToken / idoTotalWeight) * (weightOfParticipant[stakers[i]])) + getAdminSetting().getTransactionFeesPerBatch();
             if (balanceOfParticipant[stakers[i]] > amountPerUser) {
                 // send back extra busd
                 _payCrypto.transfer(
                     stakers[i],
-                    balanceOfParticipant[stakers[i]].sub(amountPerUser)
+                    balanceOfParticipant[stakers[i]] - amountPerUser
                 );
                 balanceOfParticipant[stakers[i]] = amountPerUser;
             }
         }
-        emit tokenAddressSet(address (this), _tokenAddress);
+        emit tokenAddressSet(address (this), _token);
         redistributeIdoToken();
     }
 
-    function idoLockDeposit() public onlyAdmin {
+    function idoLockDeposit() public noReEntrancy onlyAdmin {
         isLocked = true;
         lockTimestamp = block.timestamp;
         emit idoDepositLocked(address (this));
     }
 
-    function redistributeIdoToken() public {
-        //keep in mind that the 1%one percent is not transfer (for the team)
-        uint256 onePercent = numberOfTokenFromIdo.div(100);
-        uint256 remainingToDistribute = numberOfTokenFromIdo.sub(onePercent).sub(numberOfTokenDistributed);
+    function redistributeIdoToken() public noReEntrancy {
+        //keep in mind that the 1% percent is not transfer (for the team)
+        uint256 onePercent = numberOfTokenFromIdo / 100;
+        uint256 remainingToDistribute = numberOfTokenFromIdo - onePercent - numberOfTokenDistributed;
         uint256 amountToDistributeNow = remainingToDistribute;
-        IERC20 tokenToTransfer = IERC20(tokenAddress);
         
         uint256 thisAddressBalance = tokenToTransfer.balanceOf(address(this));
 
@@ -102,7 +102,7 @@ contract Ido is CeEduOwnable {
         
         for (uint i = 0; i < stakers.length; i++) {
             if (balanceOfParticipant[stakers[i]] > 0) {
-                uint256 amountPerUser = amountToDistributeNow.div(idoTotalWeight).mul(weightOfParticipant[stakers[i]]);
+                uint256 amountPerUser = amountToDistributeNow / idoTotalWeight * weightOfParticipant[stakers[i]];
                 tokenToTransfer.transfer(
                     stakers[i],
                     amountPerUser
@@ -110,7 +110,7 @@ contract Ido is CeEduOwnable {
             }
         }
         // set the new total distributed
-        numberOfTokenDistributed = numberOfTokenDistributed.add(amountToDistributeNow);
+        numberOfTokenDistributed += amountToDistributeNow;
         // close the ido and send the rest to the team address
         if (amountToDistributeNow == remainingToDistribute) {
             isCompleted = true;
@@ -121,16 +121,16 @@ contract Ido is CeEduOwnable {
         }
     }
 
-    function depositForIdo(uint256 _amount, IERC20 _payCrypto) public isEligibleForIdo returns (bool)  {
+    function depositForIdo(uint256 _amount, IERC20 _payCrypto) public noReEntrancy isEligibleForIdo returns (bool)  {
         // Require amount greater than 0
         require(getAdminSetting().tokenIsAccepted(address(_payCrypto)) && _payCrypto.balanceOf(msg.sender) >= _amount, "No enough Token to pay");
-        require(_amount >= 0 && _amount.add(balanceOfParticipant[msg.sender]) <= maxPerUser && !isLocked, "amount cannot be 0 and should be less than maximum");
+        require(_amount >= 0 && _amount + balanceOfParticipant[msg.sender] <= maxPerUser && !isLocked, "amount cannot be 0 and should be less than maximum");
         // Transfer 
         // approve
         require(_payCrypto.transferFrom(msg.sender, getAdminSetting().getIdoReceiverAddress(), _amount), "Unable to transfer crypto");
 
-        balanceOfParticipant[msg.sender] = balanceOfParticipant[msg.sender].add(_amount);
-        totalDeposited = totalDeposited.add(_amount);
+        balanceOfParticipant[msg.sender] += _amount;
+        totalDeposited += _amount;
 
         if (!hasParticipated[msg.sender]) {
             stakers.push(msg.sender);
@@ -144,13 +144,13 @@ contract Ido is CeEduOwnable {
         uint256 sum = 0;
         for (uint i = 0; i < stakers.length; i++) {
             if (balanceOfParticipant[stakers[i]] > 0) {
-                sum = sum.add(weightOfParticipant[stakers[i]]);
+                sum += weightOfParticipant[stakers[i]];
             }
         }
         return sum;
     }
     
-    function emergencyTransfer(IERC20 token) public onlySuperAdmin {
+    function emergencyTransfer(IERC20 token) public noReEntrancy onlySuperAdmin {
         token.transfer(getAdminSetting().getIdoReceiverAddress(), token.balanceOf(address(this)));
     }
 
