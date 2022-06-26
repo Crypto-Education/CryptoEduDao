@@ -77,9 +77,15 @@ contract("BatchManager", async accounts => {
 
     // test userWeight getUserWeight 
     assert.equal(await batchMDeployed.getUserWeight(accounts[0]), 0);
-    assert.equal(await batchMDeployed.getUserWeight(accounts[1]), 25);
-    assert.equal(await batchMDeployed.getUserWeight(accounts[2]), 25);
-    assert.equal(await batchMDeployed.getUserWeight(accounts[3]), 50);
+    assert.equal(await batchMDeployed.getUserWeight(accounts[1]), 1);
+    assert.equal(await batchMDeployed.getUserWeight(accounts[2]), 1);
+    assert.equal(await batchMDeployed.getUserWeight(accounts[3]), 2);
+    // test userWeight getPercentageUserWeight
+    assert.equal(await batchMDeployed.getPercentageUserWeight(accounts[0]), 0);
+    assert.equal(await batchMDeployed.getPercentageUserWeight(accounts[1]), 25);
+    assert.equal(await batchMDeployed.getPercentageUserWeight(accounts[2]), 25);
+    assert.equal(await batchMDeployed.getPercentageUserWeight(accounts[3]), 50);
+    
 
   });
 
@@ -94,8 +100,8 @@ contract("BatchManager", async accounts => {
     // pass admin role to account 1 
     await cDAOAdmins.grantAdmin(accounts[1], {from : accounts[0]});
     await truffleAssert.reverts(batchMDeployed.recoverLostWallet( accounts[1], accounts[3], {from: accounts[1]})); // is not super admin 
-    assert.equal(await batchMDeployed.getUserWeight(accounts[1]), 25);
-    assert.equal(await batchMDeployed.getUserWeight(accounts[4]), 0);
+    assert.equal(await batchMDeployed.getPercentageUserWeight(accounts[1]), 25);
+    assert.equal(await batchMDeployed.getPercentageUserWeight(accounts[4]), 0);
 
     assert.ok(await
       batchMDeployed.redistributeToOldInvestor(
@@ -108,8 +114,8 @@ contract("BatchManager", async accounts => {
 
     assert.ok( await batchMDeployed.recoverLostWallet( accounts[1], accounts[4], {from: accounts[0]})); // is super admin 
     // account 1 shoud be blacklisted 
-    assert.equal(await batchMDeployed.getUserWeight(accounts[1]), 0);
-    assert.equal(await batchMDeployed.getUserWeight(accounts[4]), 25);
+    assert.equal(await batchMDeployed.getPercentageUserWeight(accounts[1]), 0);
+    assert.equal(await batchMDeployed.getPercentageUserWeight(accounts[4]), 25);
     assert.isTrue(await capitalMDeployed.isBlacklisted(accounts[1]));
     assert.equal(await cECAToken.balanceOf(accounts[4]), web3.utils.toWei("200"));
 

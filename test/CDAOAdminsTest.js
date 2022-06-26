@@ -31,7 +31,7 @@ contract("CDAOAdmins", accounts => {
             `${accounts[1]} n'est pas superadmin`
             );
 
-        await cDAOAdmins.grantAdmin(accounts[2], {from : accounts[0]});
+        assert.ok(await cDAOAdmins.grantAdmin(accounts[2], {from : accounts[0]}));
         assert.equal(
             await cDAOAdmins.isAdmin(accounts[2]),
             true,
