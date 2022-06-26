@@ -1,6 +1,9 @@
 const Batch = artifacts.require("Batch");
 const BatchManager = artifacts.require("BatchManager");
 const fusd = artifacts.require("FBusd");
+const CDAOAdmins = artifacts.require("CDAOAdmins");
+
+const truffleAssert = require("truffle-assertions");
 contract("Batch", async accounts => {
 
     
@@ -144,5 +147,29 @@ contract("Batch", async accounts => {
     
     });
     
-    
+    it("TEST Token Information", async () => {
+      //const batchMDeployed = await BatchManager.deployed();
+      const cDAOAdmins = await CDAOAdmins.deployed();
+      //const capitalMDeployed = await CapitalManager.deployed();
+      const fusdDeployed = await fusd.deployed();
+      //const cECAToken = await CECAToken.deployed();
+  
+      const batchDeployed = await BatchManager.deployed();
+
+      await batchDeployed.createAppendBatch("Batch new |Test Blockchain", false, {from: accounts[0]});
+      
+      const batchCreated1 = await Batch.at(await batchDeployed.getBatch.call(2));
+      
+      await cDAOAdmins.grantAdmin(accounts[3], {from : accounts[0]});
+
+      await truffleAssert.reverts(batchCreated1.setTokenInformation(fusdDeployed.address, false, web3.utils.toWei("100"), {from: accounts[5]})); 
+      await truffleAssert.reverts(batchCreated1.setTokenInformation(fusdDeployed.address, false, web3.utils.toWei("100"), {from: accounts[2]})); 
+      assert.ok(await batchCreated1.setTokenInformation(fusdDeployed.address, false, web3.utils.toWei("100"), {from: accounts[3]}),'admin can call ');
+      await truffleAssert.reverts(batchCreated1.setTokenInformation(fusdDeployed.address, false, web3.utils.toWei("100"), {from: accounts[7]}));
+      assert.ok(await batchCreated1.setTokenInformation(fusdDeployed.address, false, web3.utils.toWei("100"), {from: accounts[0]}),'super admin can call ');
+      const tokenInfos = await batchCreated1.tokenInfos.call(fusdDeployed.address);
+      assert.equal(tokenInfos.amount,web3.utils.toWei("100"),'amount not equal ');
+      
+
+    });
   });
