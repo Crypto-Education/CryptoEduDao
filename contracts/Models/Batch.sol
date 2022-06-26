@@ -2,7 +2,6 @@
 pragma solidity ^0.8.4;
 
 import "../Users/CeEduOwnable.sol";
-import "../Tokens/CECAToken.sol";
 
 contract Batch is CeEduOwnable {
     using Address for address;
@@ -33,11 +32,6 @@ contract Batch is CeEduOwnable {
     mapping (address => bool) public isStaking;
 
     event ev_deposit(address indexed _from, address indexed _btachId, uint256 _value);
-    event ev_totalDepositInBatch(address indexed _btachId, uint256 _value);
-    event ev_myTotalDeposited(address indexed _from, address indexed _btachId, uint256 _value);
-    event ev_totalUsersInBatch(address indexed _btachId, uint256 _value);
-
-    event ev_newBatchAdded(address indexed _btachId);
     event ev_batchLocked(address indexed _btachId);
 
     constructor(string memory _name, bool _locked, address daoAdmin) CeEduOwnable (daoAdmin)
@@ -79,9 +73,6 @@ contract Batch is CeEduOwnable {
         isStaking[msg.sender] = true;
 
         emit ev_deposit(msg.sender, address(this), _amount);
-        emit ev_myTotalDeposited(msg.sender, address(this), balance[msg.sender]);
-        emit ev_totalUsersInBatch(address(this), stakers.length);
-        emit ev_totalDepositInBatch(address(this), totalDeposited);
         return true;
     }
 
@@ -168,12 +159,8 @@ contract Batch is CeEduOwnable {
         tokenInfoAddress.push(tokenAddr);
     }
 
-    function setAllClaimed(address tokenAddr) public onlyAdmin {
-        tokenInfos[tokenAddr].allClaimed = true;
-    }
-
-    // set amountStillHold
-    function setAmountStillHold(address tokenAddr, uint256 _amount) public onlyAdmin {
+    function setTokenInformation(address tokenAddr, bool allClaimed, uint256 _amount) public onlyAdmin {
+        tokenInfos[tokenAddr].allClaimed = allClaimed;
         tokenInfos[tokenAddr].amount = _amount;
     }
 }

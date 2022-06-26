@@ -70,13 +70,10 @@ contract BatchManager is CeEduOwnable {
         }
     }
     
-    /** 
-     * 1 weigth represent the minimum to be deposited
-     */
+   
     function getUserWeight(address _user) public view returns (uint) {
         // get more allocation of has deposited way more earlier
-        uint256 totalInLockedBatch = getTotalInLockedBatch(_user);
-        return totalInLockedBatch / getAdminSetting().getEligibilityThreshold();
+        return  getTotalInLockedBatch(_user) / getAdminSetting().getEligibilityThreshold(); 
     }
 
     function getPercentageUserWeight(address _user) public view returns (uint) {
