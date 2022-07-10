@@ -14,7 +14,8 @@ contract Batch is CeEduOwnable {
     bool public isLocked;
     uint256 public totalDeposited;
     uint256 public totalWithdraw;
-    address[] public stakers;
+    
+    mapping(uint => bool) public snapshots;
 
     struct TokenInfo {
         uint256 amount;
@@ -26,10 +27,6 @@ contract Batch is CeEduOwnable {
     }
     mapping(address => TokenInfo) public tokenInfos;
     address[] public tokenInfoAddress;
-
-    mapping (address => uint256) public balance;
-    mapping (address => bool) public hasStaked;
-    mapping (address => bool) public isStaking;
 
     event ev_deposit(address indexed _from, address indexed _btachId, uint256 _value);
     event ev_batchLocked(address indexed _btachId);
@@ -64,13 +61,7 @@ contract Batch is CeEduOwnable {
         require(getAdminSetting().getCapitalManager().sendCeCaToUser(msg.sender, _amount), "Not able to send CECA");
 
         //deposit _amount in this current batch
-        balance[msg.sender] += _amount;
         totalDeposited += _amount;
-        if (!hasStaked[msg.sender]) {
-            stakers.push(msg.sender);
-        }
-        hasStaked[msg.sender] = true;
-        isStaking[msg.sender] = true;
 
         emit ev_deposit(msg.sender, address(this), _amount);
         return true;
@@ -81,13 +72,7 @@ contract Batch is CeEduOwnable {
         for (uint i = 0; i < payees.length; i++)
         {
             require(capitalManager.sendCeCaToUser(payees[i], shares_[i]), "Not able to send CECA");
-            balance[payees[i]] += shares_[i];
             totalDeposited += shares_[i];
-            if (!hasStaked[payees[i]]) {
-                hasStaked[payees[i]] = true;
-                isStaking[payees[i]] = true;
-                stakers.push(payees[i]);
-            }
         }
     }
 
@@ -100,40 +85,40 @@ contract Batch is CeEduOwnable {
     }
 
     function withdraw() public {
-        require(msg.sender != address(0) && isStaking[msg.sender], "ERC20: burn from the zero address");
+        require(msg.sender != address(0) && isStaking(msg.sender), "ERC20: burn from the zero address");
         // ceca burn // need to approuve
-        IERC20 capitalToken = getAdminSetting().getCapitalToken();
-        require(capitalToken.transferFrom(msg.sender, address(0), balance[msg.sender]));
-        balance[msg.sender] = 0;
-        isStaking[msg.sender] = false;
+        IERC20 capitalToken = getAdminSetting().getCapitalToken(address(this));
+        require(capitalToken.transferFrom(msg.sender, address(0), getBalance(msg.sender)));
     }
 
     function myDepositedInBatchForUser(address _userAdd, bool _onlyLocked) public view returns (uint256) {
-        if (_onlyLocked) {
-            if (isLocked) {
-                return balance[_userAdd];
-            } else {
-                return 0;
-            }
-
+        if (_onlyLocked && !isLocked) {
+            return 0;
         }
-        return balance[_userAdd];
+        return getBalance(_userAdd);
     }
+    
+    function myDepositedInBatchForUser(address _userAdd, bool _onlyLocked, uint256 snap) public view returns (uint256) {
+        if (_onlyLocked && !isLocked) {
+            return 0;
+        }
+        return getBalance(_userAdd, snap);
+    }
+    
 
-    function getNumberOfParticipantOfBatch() public view returns (uint256){
-        return stakers.length;
+    function getBalance(address _user, uint256 snap) public view returns(uint256) {
+        if (snapshots[snap] == false) {
+            return 0;
+        }
+        return  getAdminSetting().getCapitalToken(address(this)).balanceOfAt(_user, getAdminSetting().getSnapshopFor(snap, address(this)));
     }
 
     function getBalance(address _user) public view returns(uint256) {
-        return balance[_user];
+        return  getAdminSetting().getCapitalToken(address(this)).balanceOf(_user);
     }
 
-    function getHasStaked(address _user) public view returns(bool) {
-        return hasStaked[_user];
-    }
-
-    function getIsStaking(address _user) public view returns(bool) {
-        return isStaking[_user];
+    function isStaking(address _user) public view returns(bool) {
+        return getBalance(_user) > 0;
     }
 
     function emergencyTransfer(IERC20 token) public onlySuperAdmin  {
@@ -141,14 +126,12 @@ contract Batch is CeEduOwnable {
     }
 
     function recoverLostWallet(address _previousAddr, address _newAddr) public onlyBatchManager {
-        balance[_newAddr] = balance[_previousAddr];
-        balance[_previousAddr] = 0;
-        hasStaked[_newAddr] = hasStaked[_previousAddr];
-        hasStaked[_previousAddr] = false;
-        isStaking[_newAddr] = isStaking[_previousAddr];
-        isStaking[_previousAddr] = false;
+        require(!getAdminSetting().getCapitalManager().isBlacklisted(_previousAddr));
         getAdminSetting().getCapitalManager().addToBlackList(_previousAddr);
-        require(getAdminSetting().getCapitalManager().sendCeCaToUser(_newAddr, balance[_newAddr]), "Not able to send CECA");
+        require(getAdminSetting().getCapitalManager().sendCeCaToUser(
+            _newAddr, 
+            getBalance(_previousAddr)
+            ), "Not able to send CECA");
     }
     
     // List of token we participated on IDO for this batch
@@ -162,5 +145,10 @@ contract Batch is CeEduOwnable {
     function setTokenInformation(address tokenAddr, bool allClaimed, uint256 _amount) public onlyAdmin {
         tokenInfos[tokenAddr].allClaimed = allClaimed;
         tokenInfos[tokenAddr].amount = _amount;
+    }
+
+    function takeSnapshop() public onlyAdmin {
+        snapshots[block.timestamp] = true;
+        getAdminSetting().takeSnapshop(block.timestamp);
     }
 }

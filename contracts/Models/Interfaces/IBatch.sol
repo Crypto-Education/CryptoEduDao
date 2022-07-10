@@ -13,6 +13,9 @@ interface IBatch {
 
     function myDepositedInBatchForUser(address _userAdd, bool _onlyLocked) external view returns (uint256);
 
+    function myDepositedInBatchForUser(address _userAdd, bool _onlyLocked, uint snap) external view returns (uint256);
+
+
     function getNumberOfParticipantOfBatch() external view returns (uint256);
 
     function getBalance(address _user) external returns(uint256);

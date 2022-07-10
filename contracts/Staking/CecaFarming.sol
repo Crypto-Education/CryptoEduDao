@@ -37,7 +37,7 @@ contract CecaFarming is CeEduOwnable {
 
     constructor(address daoAdmin) CeEduOwnable (daoAdmin) {}
 
-    function stake(uint256 amount) public notIsLocked noReEntrancy{
+    /*function stake(uint256 amount) public notIsLocked noReEntrancy{
         require(
             amount > 0 &&
             getAdminSetting().getCapitalToken().balanceOf(msg.sender) >= amount, 
@@ -54,9 +54,9 @@ contract CecaFarming is CeEduOwnable {
         stakingBalance[msg.sender] += amount;
         startTime[msg.sender] = block.timestamp;
         emit Stake(msg.sender, amount);
-    }
+    }*/
 
-    function unstake(uint256 amount) public {
+    /*function unstake(uint256 amount) public {
         require(
             isStaking[msg.sender] = true &&
             stakingBalance[msg.sender] >= amount, 
@@ -73,7 +73,7 @@ contract CecaFarming is CeEduOwnable {
             isStaking[msg.sender] = false;
         }
         emit Unstake(msg.sender, balanceTransfer);
-    }
+    }*/
 
     function withdrawYield() public {
         uint256 toTransfer = calculateYieldTotal(msg.sender);

@@ -22,6 +22,7 @@ contract BatchManager is CeEduOwnable {
         Batch newBatch = new Batch(_name, _locked, address(getAdminSetting()));
         batchList.push(newBatch);
         mapBatchAddresses[address(newBatch)] = true;
+        getAdminSetting().createCecaTokenForBatch(address(newBatch), batchList.length);
         emit ev_batchCreated(newBatch);
     }
 
@@ -64,6 +65,13 @@ contract BatchManager is CeEduOwnable {
         return totalInLockedBatch;
     }
 
+    function getTotalInLockedBatch(address _user, uint snap) public view returns(uint256) {
+        uint256 totalInLockedBatch = 0;
+        for (uint i = 0; i < batchList.length; i++) {
+            totalInLockedBatch += batchList[i].myDepositedInBatchForUser(_user, true, snap);
+        }
+        return totalInLockedBatch;
+    }
     function recoverLostWallet(address _previousAddr, address _newAddr) public onlySuperAdmin {
         for (uint i = 0; i < batchList.length; i++) {
             batchList[i].recoverLostWallet(_previousAddr, _newAddr);
@@ -74,6 +82,10 @@ contract BatchManager is CeEduOwnable {
     function getUserWeight(address _user) public view returns (uint) {
         // get more allocation of has deposited way more earlier
         return  getTotalInLockedBatch(_user) / getAdminSetting().getEligibilityThreshold(); 
+    }
+
+    function  getUserWeightFromSnapshot(address _user, uint snap) public view returns (uint) {
+        return getTotalInLockedBatch(_user, snap) / getAdminSetting().getEligibilityThreshold(); 
     }
 
     function getPercentageUserWeight(address _user) public view returns (uint) {

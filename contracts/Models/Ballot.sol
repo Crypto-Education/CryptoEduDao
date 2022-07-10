@@ -8,9 +8,8 @@ import "../Managers/CapitalManager.sol";
 /// @title Voting with delegation.
 contract Ballot is CeEduOwnable {
     string public name;
-    // This declares a new complex type which will
-    // be used for variables later.
-    // It will represent a single voter.
+    uint256 public snapshopsId;
+
     struct Voter {
         uint weight; // weight is accumulated by delegation
         bool voted;  // if true, that person already voted
@@ -24,8 +23,6 @@ contract Ballot is CeEduOwnable {
         uint voteCount; // number of accumulated votes
     }
 
-    // This declares a state variable that
-    // stores a `Voter` struct for each possible address.
     mapping(address => Voter) public voters;
 
     uint public nbVoters;
@@ -40,13 +37,8 @@ contract Ballot is CeEduOwnable {
         name = _name;
         completed = false;
 
-        // For each of the provided proposal names,
-        // create a new proposal object and add it
-        // to the end of the array.
+        
         for (uint i = 0; i < proposalNames.length; i++) {
-            // `Proposal({...})` creates a temporary
-            // Proposal object and `proposals.push(...)`
-            // appends it to the end of `proposals`.
             proposals.push(Proposal({
             name: proposalNames[i],
             voteCount: 0
@@ -62,15 +54,14 @@ contract Ballot is CeEduOwnable {
         _;
     }
 
-    /// Give your vote (including votes delegated to you)
-    /// to proposal `proposals[proposal].name`.
+    
     function vote(uint proposal) public isEligibleForIdo {
         require(!completed && proposal < proposals.length , "Vote is completed or proposal not found");
         Voter storage sender = voters[msg.sender];
         require(!sender.voted, "Already voted.");
         sender.voted = true;
         sender.vote = proposal;
-        sender.weight = getAdminSetting().getBatchManager().getUserWeight(msg.sender);
+        sender.weight = getAdminSetting().getBatchManager().getUserWeightFromSnapshot(msg.sender, snapshopsId);
         proposals[proposal].voteCount += sender.weight;
         nbVoters ++;
     }
@@ -88,9 +79,7 @@ contract Ballot is CeEduOwnable {
         }
     }
 
-    // Calls winningProposal() function to get the index
-    // of the winner contained in the proposals array and then
-    // returns the name of the winner
+    
     function winnerName() public view  returns (string memory winnerName_)
     {
         winnerName_ = proposals[winningProposal()].name;
@@ -106,5 +95,10 @@ contract Ballot is CeEduOwnable {
 
     function canVote() public view returns(bool) {
         return voters[msg.sender].voted == false && completed == false;
+    }
+
+    function takeSnapshop() public onlyAdmin {
+        snapshopsId = block.timestamp;
+        getAdminSetting().takeSnapshop(snapshopsId);
     }
 }

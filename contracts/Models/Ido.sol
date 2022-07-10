@@ -24,6 +24,8 @@ contract Ido is CeEduOwnable {
     mapping (address => uint256) public balanceOfParticipant;
     mapping (address => uint) public weightOfParticipant;
 
+    uint256 public snapshopsId;
+
     event tokenAddressSet(address indexed _idoId, IERC20 _tokenAddress);
     event idoDepositLocked(address indexed _idoId);
     event idoNewIdoAdded(address indexed _idoId);
@@ -136,7 +138,7 @@ contract Ido is CeEduOwnable {
             stakers.push(msg.sender);
             hasParticipated[msg.sender] = true;
         }
-        weightOfParticipant[msg.sender] = getAdminSetting().getBatchManager().getUserWeight(msg.sender); // because weith can change from ido to IDO we need to keep track of in each IDO
+        weightOfParticipant[msg.sender] = getAdminSetting().getBatchManager().getUserWeightFromSnapshot(msg.sender, snapshopsId); // because weith can change from ido to IDO we need to keep track of in each IDO
         return true;
     }
 
@@ -177,11 +179,17 @@ contract Ido is CeEduOwnable {
     function getWeightOfParticipant(address _user) public view returns(uint256) {
         return weightOfParticipant[_user];
     }
+
     function getStakers() public view returns(address[] memory) {
         return stakers;
     }
 
     function setMaxUser(uint256 max) public onlyAdmin {
         maxPerUser = max;
+    }
+
+    function takeSnapshop() public onlyAdmin {
+        snapshopsId = block.timestamp;
+        getAdminSetting().takeSnapshop(snapshopsId);
     }
 }

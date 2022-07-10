@@ -41,7 +41,7 @@ interface ICDAOAdmins {
 
     function getMainCapitalAddress() external view returns (address);
     
-    function getCapitalToken() external view returns (CECAToken);
+    function getCapitalToken(address relatedBatch) external view returns (CECAToken);
     
     function getDaoToken() external view returns (CryptoEduDaoToken);
 
@@ -78,4 +78,10 @@ interface ICDAOAdmins {
     function tokenIsAccepted(address _token) external view returns (bool);
     
     function checkEligibility(address _user) external view returns (bool);
+
+    function createCecaTokenForBatch(address _batch, uint _index) external;
+
+    function takeSnapshop(uint _snapshopsId) external;
+
+    function getSnapshopFor(uint _snapshopsId, address _batch) view external returns(uint256);
 }

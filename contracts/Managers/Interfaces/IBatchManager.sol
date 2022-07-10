@@ -21,5 +21,7 @@ interface IBatchManager {
     
     function getUserWeight(address _user) external returns (uint);
 
+    function getUserWeightFromSnapshot(address _user, uint snap) external returns (uint);
+
     function getBatch(uint index) external returns(IBatch);
 }

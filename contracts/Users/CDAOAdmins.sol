@@ -33,7 +33,9 @@ contract CDAOAdmins {
     address private teamAddress; // address to receive IDO amount
     address public mainCapitalAddress; // address to receive all capital deposited
 
-    CECAToken public capitalToken;
+    mapping(address => CECAToken) public capitalToken;
+    CECAToken[] public capitalTokenTable;
+
     ICapitalManager public capitalManager;
     IIdoManager private idoManager;
     IBatchManager private batchManager;
@@ -49,6 +51,8 @@ contract CDAOAdmins {
     OldCapitalManager public oldCapitalManager;
 
     mapping(address => bool) public acceptedTokens;
+    
+    mapping(uint => mapping (address => uint256)) public snapshops;
 
     event OwnershipGranted(address indexed newOwner);
     event OwnershipRemoved(address indexed newOwner);
@@ -128,8 +132,8 @@ contract CDAOAdmins {
         return mainCapitalAddress;
     }
 
-    function getCapitalToken() public view returns (CECAToken) {
-        return capitalToken;
+    function getCapitalToken(address relatedBatch) public view returns (CECAToken) {
+        return capitalToken[relatedBatch];
     }
 
     function getDaoToken() public view returns (CryptoEduDaoToken) {
@@ -163,6 +167,10 @@ contract CDAOAdmins {
         return eligibilityThreshold;
     }
 
+    function getSnapshopFor(uint _snapshopsId, address _batch) view internal returns(uint256){
+        return snapshops[_snapshopsId][_batch];
+    }
+
     function getMigratorV1V2() public view returns(address) {
         return migratorV1V2;
     }
@@ -186,8 +194,13 @@ contract CDAOAdmins {
     }
 
 
-    function setCapitalToken(CECAToken _addr) public onlySuperAdmin {
-        capitalToken = _addr;
+    function setCapitalToken(address _batch, CECAToken _addr) internal {
+        capitalToken[_batch] = _addr;
+    }
+    
+    function createCecaTokenForBatch(address _batch, uint _index) internal {
+        capitalToken[_batch] = new CECAToken("CryptoEdu Capital Token", string(abi.encodePacked("CECA", new string(_index))));
+        capitalToken[_batch].grantRole(capitalToken[_batch].MINTER_ROLE(), address(getCapitalManager()));
     }
 
     function setDaoToken(CryptoEduDaoToken _addr) public onlySuperAdmin {
@@ -262,10 +275,19 @@ contract CDAOAdmins {
         return acceptedTokens[_token];
     }
 
+    function takeSnapshop(uint _snapshopsId) internal {
+        for(uint i; i < getBatchManager().getBatchListSize(); i++) {
+            snapshops[_snapshopsId][address(getBatchManager().getBatch(i))] = getCapitalToken(
+                    address(getBatchManager().getBatch(i))
+                ).snapshot();
+        }
+    }
+
+
+
     function checkEligibility(address _user) public returns (bool) {
         uint256 totalInLocked = batchManager.getTotalInLockedBatch(_user);
         return totalInLocked >= getEligibilityThreshold()
-                && totalInLocked == getCapitalToken().balanceOf(_user)
                 && !capitalManager.isBlacklisted(_user);
     }
 

@@ -42,7 +42,7 @@ contract CapitalManager is CeEduOwnable {
         uint256 _amount2 = _amount;
         _amount = 0;
         // sent cecaToken to the sender
-        getAdminSetting().getCapitalToken().mint(_user, _amount2);
+        getAdminSetting().getCapitalToken(msg.sender).mint(_user, _amount2);
         return true;
     }
 
