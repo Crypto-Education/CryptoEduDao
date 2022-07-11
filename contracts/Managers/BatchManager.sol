@@ -7,8 +7,8 @@ import "../Models/Batch.sol";
 
 contract BatchManager is CeEduOwnable {
     using Address for address;
-    
     string name;
+
     mapping (address => bool) mapBatchAddresses;
     Batch[] public batchList;
 
@@ -22,7 +22,7 @@ contract BatchManager is CeEduOwnable {
         Batch newBatch = new Batch(_name, _locked, address(getAdminSetting()));
         batchList.push(newBatch);
         mapBatchAddresses[address(newBatch)] = true;
-        getAdminSetting().createCecaTokenForBatch(address(newBatch), batchList.length);
+        getAdminSetting().getCapitalManager().createCecaTokenForBatch(address(newBatch), batchList.length);
         emit ev_batchCreated(newBatch);
     }
 

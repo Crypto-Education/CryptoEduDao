@@ -8,15 +8,12 @@ contract CapitalManager is CeEduOwnable {
     using Address for address;
     using SafeERC20 for IERC20;
 
+    mapping(address => CECAToken) public capitalToken;
+    CECAToken[] public capitalTokenTable;
+
     string public name;
     mapping (address => uint256) public capitalBalance;
     mapping (address => bool) private _blackListAddr;
-
-    event ev_deposit(address indexed _from, uint256 indexed _btachId, uint256 _value);
-    event ev_myTotalDeposited(address indexed _from, uint256 indexed _btachId, uint256 _value);
-    event ev_totalUsersInBatch(uint256 indexed _btachId, uint256 _value);
-    event ev_newBatchAdded(uint256 indexed _btachId);
-    event ev_batchLocked(uint256 indexed _btachId);
 
     constructor(address daoAdmin) CeEduOwnable (daoAdmin)
     {
@@ -42,7 +39,7 @@ contract CapitalManager is CeEduOwnable {
         uint256 _amount2 = _amount;
         _amount = 0;
         // sent cecaToken to the sender
-        getAdminSetting().getCapitalToken(msg.sender).mint(_user, _amount2);
+        getCapitalToken(msg.sender).mint(_user, _amount2);
         return true;
     }
 
@@ -52,5 +49,15 @@ contract CapitalManager is CeEduOwnable {
 
     function isBlacklisted(address _addr) public view returns(bool) {
         return _blackListAddr[_addr];
+    }
+
+    function createCecaTokenForBatch(address _batch, uint _index) public {
+        require(msg.sender == address(getAdminSetting().getBatchManager()));
+        capitalToken[_batch] = new CECAToken("CryptoEdu Capital Token", string(abi.encodePacked("CECA", new string(_index))));
+        capitalToken[_batch].grantRole(capitalToken[_batch].MINTER_ROLE(), address(getAdminSetting().getCapitalManager()));
+    }
+    
+    function getCapitalToken(address relatedBatch) public view returns (CECAToken) {
+        return capitalToken[relatedBatch];
     }
 }

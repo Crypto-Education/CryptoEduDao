@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import "../Tokens/CECAToken.sol";
 import "../Tokens/CryptoEduDaoToken.sol";
 import "../Managers/Interfaces/IBatchManager.sol";
 import "../Managers/Interfaces/IIdoManager.sol";
@@ -32,9 +31,6 @@ contract CDAOAdmins {
     address private idoReceiverAddress; // address to receive IDO amount / when users contributes
     address private teamAddress; // address to receive IDO amount
     address public mainCapitalAddress; // address to receive all capital deposited
-
-    mapping(address => CECAToken) public capitalToken;
-    CECAToken[] public capitalTokenTable;
 
     ICapitalManager public capitalManager;
     IIdoManager private idoManager;
@@ -132,8 +128,8 @@ contract CDAOAdmins {
         return mainCapitalAddress;
     }
 
-    function getCapitalToken(address relatedBatch) public view returns (CECAToken) {
-        return capitalToken[relatedBatch];
+    function getCapitalToken(address relatedBatch) public returns (ISERC20) {
+        return getCapitalManager().getCapitalToken(relatedBatch);
     }
 
     function getDaoToken() public view returns (CryptoEduDaoToken) {
@@ -191,16 +187,6 @@ contract CDAOAdmins {
 
     function setMainCapitalAddress(address _addr) public onlySuperAdmin {
         mainCapitalAddress = _addr;
-    }
-
-
-    function setCapitalToken(address _batch, CECAToken _addr) internal {
-        capitalToken[_batch] = _addr;
-    }
-    
-    function createCecaTokenForBatch(address _batch, uint _index) internal {
-        capitalToken[_batch] = new CECAToken("CryptoEdu Capital Token", string(abi.encodePacked("CECA", new string(_index))));
-        capitalToken[_batch].grantRole(capitalToken[_batch].MINTER_ROLE(), address(getCapitalManager()));
     }
 
     function setDaoToken(CryptoEduDaoToken _addr) public onlySuperAdmin {
@@ -282,8 +268,6 @@ contract CDAOAdmins {
                 ).snapshot();
         }
     }
-
-
 
     function checkEligibility(address _user) public returns (bool) {
         uint256 totalInLocked = batchManager.getTotalInLockedBatch(_user);

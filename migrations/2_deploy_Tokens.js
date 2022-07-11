@@ -63,7 +63,7 @@ module.exports = async function (deployer, network, accounts) {
             /**
              * deploy tokens
              */
-            await deployer.deploy(CECAToken)
+            await deployer.deploy(CECAToken, "Cedu capital", "Ceca")
             cecaToken = await CECAToken.deployed()
 
             await deployer.deploy(CryptoEduDaoToken)
@@ -109,7 +109,7 @@ module.exports = async function (deployer, network, accounts) {
             await cdaoAdmins.setTeamAddress(addressesList.testnet.teamAddress, {from: accounts[0]})
             await cdaoAdmins.setMainCapitalAddress(addressesList.testnet.capitalDeposit, {from: accounts[0]})
             /**Set token */
-            await cdaoAdmins.setCapitalToken(cecaToken.address, {from: accounts[0]})
+            //await cdaoAdmins.setCapitalToken(cecaToken.address, {from: accounts[0]})
             await cdaoAdmins.setDaoToken(cryptoEduDaoToken.address, {from: accounts[0]})
             /**Set managers */
             await cdaoAdmins.setCapitalManagerByAdmin(capitalManager.address, {from: accounts[0]})

@@ -46,6 +46,11 @@ contract Ballot is CeEduOwnable {
         }
     }
 
+    modifier snapToken() {
+        require(snapshopsId > 0, "spanshot not taken yet");
+        _;
+    }
+    
     modifier isEligibleForIdo() {
         require(
             getAdminSetting().checkEligibility(msg.sender),
@@ -55,7 +60,7 @@ contract Ballot is CeEduOwnable {
     }
 
     
-    function vote(uint proposal) public isEligibleForIdo {
+    function vote(uint proposal) public snapToken isEligibleForIdo {
         require(!completed && proposal < proposals.length , "Vote is completed or proposal not found");
         Voter storage sender = voters[msg.sender];
         require(!sender.voted, "Already voted.");
