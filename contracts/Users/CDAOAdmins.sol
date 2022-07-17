@@ -275,6 +275,17 @@ contract CDAOAdmins {
                 && !capitalManager.isBlacklisted(_user);
     }
 
+    function checkEligibility(address _user, uint256 _snap, address _batchId) public returns (bool) {
+        uint256 totalInLocked;
+        if (_batchId != address(0)) {
+            totalInLocked = batchManager.getTotalInLockedBatch(_user, _snap, _batchId);
+        } else {
+            totalInLocked = batchManager.getTotalInLockedBatch(_user, _snap);
+        }
+        
+        return totalInLocked >= getEligibilityThreshold() && !capitalManager.isBlacklisted(_user);
+    }
+
     /**
         Old contract from V1
      */

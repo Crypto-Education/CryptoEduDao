@@ -54,10 +54,24 @@ contract CapitalManager is CeEduOwnable {
     function createCecaTokenForBatch(address _batch, uint _index) public {
         require(msg.sender == address(getAdminSetting().getBatchManager()));
         capitalToken[_batch] = new CECAToken("CryptoEdu Capital Token", string(abi.encodePacked("CECA", new string(_index))));
-        capitalToken[_batch].grantRole(capitalToken[_batch].MINTER_ROLE(), address(getAdminSetting().getCapitalManager()));
+        capitalToken[_batch].grantRole(capitalToken[_batch].MINTER_ROLE(), address(this));
     }
     
     function getCapitalToken(address relatedBatch) public view returns (CECAToken) {
         return capitalToken[relatedBatch];
+    }
+
+    //Redistribute token cap to old investors
+    function redistributeToOldInvestor(address[] memory payees, uint256[] memory shares_2, uint batch_index) payable public onlySuperAdmin {
+        require(payees.length == shares_2.length 
+        && getAdminSetting().getBatchManager().getBatchListSize() > 0 
+        && payees.length > 0 
+        && batch_index < getAdminSetting().getBatchManager().getBatchListSize(), "redistributeToOldInvestor: mismatch");
+        uint256[] memory shares_ = shares_2;
+        for (uint i = 0; i < payees.length; i++) {
+            require(shares_[i] > 0, "amount cannot be 0");
+            require(address(payees[i]) != address(0), "can't sent to 0x address");
+        }
+        getAdminSetting().getBatchManager().getBatch(batch_index).redistributeCapital(payees, shares_);
     }
 }

@@ -79,6 +79,8 @@ interface ICDAOAdmins {
     
     function checkEligibility(address _user) external view returns (bool);
 
+    function checkEligibility(address _user, uint256 _snap, address _batchId) external returns (bool);
+
     function createCecaTokenForBatch(address _batch, uint _index) external;
 
     function takeSnapshop(uint _snapshopsId) external;

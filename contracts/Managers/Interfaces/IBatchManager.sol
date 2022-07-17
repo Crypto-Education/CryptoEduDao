@@ -15,13 +15,19 @@ interface IBatchManager {
     function getTotalDepositedInAllBatch() external view returns (uint256);
 
     function getBatchListSize() external view returns (uint);
+
     function getTotalInLockedBatch(address _user) external returns(uint256);
+
+    function getTotalInLockedBatch(address _user, uint snap) external returns(uint256);
+
+    function getTotalInLockedBatch(address _user, uint snap, address _batchIndexr) external returns(uint256);
 
     function recoverLostWallet(address _previousAddr, address _newAddr) external;
     
+    
     function getUserWeight(address _user) external returns (uint);
 
-    function getUserWeightFromSnapshot(address _user, uint snap) external returns (uint);
+    function getUserWeight(address _user, uint snap) external returns (uint);
 
     function getBatch(uint index) external returns(IBatch);
 }

@@ -9,6 +9,7 @@ import "../Managers/CapitalManager.sol";
 contract Ballot is CeEduOwnable {
     string public name;
     uint256 public snapshopsId;
+    address public concernedBatch;
 
     struct Voter {
         uint weight; // weight is accumulated by delegation
@@ -36,8 +37,6 @@ contract Ballot is CeEduOwnable {
     constructor(string memory _name, string[] memory proposalNames, address daoAdmin) CeEduOwnable (daoAdmin) {
         name = _name;
         completed = false;
-
-        
         for (uint i = 0; i < proposalNames.length; i++) {
             proposals.push(Proposal({
             name: proposalNames[i],
@@ -46,27 +45,26 @@ contract Ballot is CeEduOwnable {
         }
     }
 
-    modifier snapToken() {
+    modifier snapTaken() {
         require(snapshopsId > 0, "spanshot not taken yet");
         _;
     }
-    
+
     modifier isEligibleForIdo() {
         require(
-            getAdminSetting().checkEligibility(msg.sender),
+            getAdminSetting().checkEligibility(msg.sender, snapshopsId, concernedBatch),
             "Amount deposited in capital is not enough or not having all deposited Ceca in your wallet"
         );
         _;
     }
-
     
-    function vote(uint proposal) public snapToken isEligibleForIdo {
+    function vote(uint proposal) public snapTaken isEligibleForIdo {
         require(!completed && proposal < proposals.length , "Vote is completed or proposal not found");
         Voter storage sender = voters[msg.sender];
         require(!sender.voted, "Already voted.");
         sender.voted = true;
         sender.vote = proposal;
-        sender.weight = getAdminSetting().getBatchManager().getUserWeightFromSnapshot(msg.sender, snapshopsId);
+        sender.weight = getAdminSetting().getBatchManager().getUserWeight(msg.sender, snapshopsId);
         proposals[proposal].voteCount += sender.weight;
         nbVoters ++;
     }
@@ -83,7 +81,6 @@ contract Ballot is CeEduOwnable {
             }
         }
     }
-
     
     function winnerName() public view  returns (string memory winnerName_)
     {

@@ -2,8 +2,9 @@
 pragma solidity ^0.8.4;
 
 import "../Users/CeEduOwnable.sol";
+import "./Redistribute.sol";
 
-contract Batch is CeEduOwnable {
+contract Batch is CeEduOwnable, Redistribute {
     using Address for address;
     using SafeERC20 for IERC20;
 
@@ -14,8 +15,6 @@ contract Batch is CeEduOwnable {
     bool public isLocked;
     uint256 public totalDeposited;
     uint256 public totalWithdraw;
-    
-    mapping(uint => bool) public snapshots;
 
     struct TokenInfo {
         uint256 amount;
@@ -41,8 +40,9 @@ contract Batch is CeEduOwnable {
         }
     }
 
-    modifier onlyBatchManager() {
+    modifier onlyManagersContracts() {
         require(msg.sender == address (getAdminSetting().getBatchManager())
+            || msg.sender == address (getAdminSetting().getCapitalManager())
             || msg.sender == getAdminSetting().getMigratorV1V2()
         , "Not Manager Contract");
         _;
@@ -67,7 +67,7 @@ contract Batch is CeEduOwnable {
         return true;
     }
 
-    function redistributeCapital(address[] memory payees, uint256[] memory shares_) public onlyBatchManager {
+    function redistributeCapital(address[] memory payees, uint256[] memory shares_) public onlyManagersContracts {
         ICapitalManager capitalManager = getAdminSetting().getCapitalManager();
         for (uint i = 0; i < payees.length; i++)
         {
@@ -84,7 +84,7 @@ contract Batch is CeEduOwnable {
         emit ev_batchLocked(address (this));
     }
 
-    function withdraw() public {
+    function exitBatch() public {
         require(msg.sender != address(0) && isStaking(msg.sender), "ERC20: burn from the zero address");
         // ceca burn // need to approuve
         IERC20 capitalToken = getAdminSetting().getCapitalToken(address(this));
@@ -125,7 +125,7 @@ contract Batch is CeEduOwnable {
         token.transfer(getAdminSetting().getMainCapitalAddress(), token.balanceOf(address(this)));
     }
 
-    function recoverLostWallet(address _previousAddr, address _newAddr) public onlyBatchManager {
+    function recoverLostWallet(address _previousAddr, address _newAddr) public onlyManagersContracts {
         require(!getAdminSetting().getCapitalManager().isBlacklisted(_previousAddr));
         getAdminSetting().getCapitalManager().addToBlackList(_previousAddr);
         require(getAdminSetting().getCapitalManager().sendCeCaToUser(
@@ -145,10 +145,5 @@ contract Batch is CeEduOwnable {
     function setTokenInformation(address tokenAddr, bool allClaimed, uint256 _amount) public onlyAdmin {
         tokenInfos[tokenAddr].allClaimed = allClaimed;
         tokenInfos[tokenAddr].amount = _amount;
-    }
-
-    function takeSnapshop() public onlyAdmin {
-        snapshots[block.timestamp] = true;
-        getAdminSetting().takeSnapshop(block.timestamp);
     }
 }

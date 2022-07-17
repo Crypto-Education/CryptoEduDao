@@ -9,12 +9,12 @@ interface IBatch {
     function redistributeCapital(address[] memory payees, uint256[] memory shares_) external;
 
     function lockBatch() external;
-    function withdraw() external;
+    
+    function exitBatch() external;
 
     function myDepositedInBatchForUser(address _userAdd, bool _onlyLocked) external view returns (uint256);
 
     function myDepositedInBatchForUser(address _userAdd, bool _onlyLocked, uint snap) external view returns (uint256);
-
 
     function getNumberOfParticipantOfBatch() external view returns (uint256);
 

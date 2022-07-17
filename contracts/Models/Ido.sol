@@ -138,7 +138,7 @@ contract Ido is CeEduOwnable {
             stakers.push(msg.sender);
             hasParticipated[msg.sender] = true;
         }
-        weightOfParticipant[msg.sender] = getAdminSetting().getBatchManager().getUserWeightFromSnapshot(msg.sender, snapshopsId); // because weith can change from ido to IDO we need to keep track of in each IDO
+        weightOfParticipant[msg.sender] = getAdminSetting().getBatchManager().getUserWeight(msg.sender, snapshopsId); // because weith can change from ido to IDO we need to keep track of in each IDO
         return true;
     }
 

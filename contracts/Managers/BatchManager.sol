@@ -12,6 +12,7 @@ contract BatchManager is CeEduOwnable {
     mapping (address => bool) mapBatchAddresses;
     Batch[] public batchList;
 
+    mapping(address => Batch) public batchListMap;
     event ev_batchCreated(Batch _BatchId);
     constructor(address daoAdmin) CeEduOwnable (daoAdmin)
     {
@@ -22,23 +23,13 @@ contract BatchManager is CeEduOwnable {
         Batch newBatch = new Batch(_name, _locked, address(getAdminSetting()));
         batchList.push(newBatch);
         mapBatchAddresses[address(newBatch)] = true;
+        batchListMap[address(newBatch)] = newBatch;
         getAdminSetting().getCapitalManager().createCecaTokenForBatch(address(newBatch), batchList.length);
         emit ev_batchCreated(newBatch);
     }
 
     function isBatch(address callerI) public view returns(bool) {
         return mapBatchAddresses[callerI];
-    }
-    
-    //Redistribute token cap to old investors
-    function redistributeToOldInvestor(address[] memory payees, uint256[] memory shares_2, uint batch_index) payable public onlySuperAdmin {
-        require(payees.length == shares_2.length && batchList.length > 0 && payees.length > 0 && batch_index < batchList.length, "redistributeToOldInvestor: mismatch");
-        uint256[] memory shares_ = shares_2;
-        for (uint i = 0; i < payees.length; i++) {
-            require(shares_[i] > 0, "amount cannot be 0");
-            require(address(payees[i]) != address(0), "can't sent to 0x address");
-        }
-        batchList[batch_index].redistributeCapital(payees, shares_);
     }
 
     function getTotalDepositedInAllBatch() public view returns (uint256){
@@ -72,6 +63,11 @@ contract BatchManager is CeEduOwnable {
         }
         return totalInLockedBatch;
     }
+
+    function getTotalInLockedBatch(address _user, uint snap, address _batchIndex) public view returns(uint256) {
+        return batchListMap[_batchIndex].myDepositedInBatchForUser(_user, true, snap);
+    }
+
     function recoverLostWallet(address _previousAddr, address _newAddr) public onlySuperAdmin {
         for (uint i = 0; i < batchList.length; i++) {
             batchList[i].recoverLostWallet(_previousAddr, _newAddr);
@@ -84,7 +80,7 @@ contract BatchManager is CeEduOwnable {
         return  getTotalInLockedBatch(_user) / getAdminSetting().getEligibilityThreshold(); 
     }
 
-    function  getUserWeightFromSnapshot(address _user, uint snap) public view returns (uint) {
+    function  getUserWeight(address _user, uint snap) public view returns (uint) {
         return getTotalInLockedBatch(_user, snap) / getAdminSetting().getEligibilityThreshold(); 
     }
 
