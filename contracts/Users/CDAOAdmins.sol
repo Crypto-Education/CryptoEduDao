@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import "../Tokens/CryptoEduDaoToken.sol";
 import "../Managers/Interfaces/IBatchManager.sol";
 import "../Managers/Interfaces/IIdoManager.sol";
 import "../Managers/Interfaces/ICapitalManager.sol";
@@ -37,7 +36,7 @@ contract CDAOAdmins {
     IBatchManager private batchManager;
     IBallotsManager private ballotManager;
     address private migratorV1V2;
-    CryptoEduDaoToken public cryptoEduDaoToken;
+    ISERC20 public CUSD;
 
     /**
         Old contract from V1
@@ -47,6 +46,7 @@ contract CDAOAdmins {
     OldCapitalManager public oldCapitalManager;
 
     mapping(address => bool) public acceptedTokens;
+    mapping(address => bool) public acceptedIdoTokens;
     
     mapping(uint => mapping (address => uint256)) public snapshops;
 
@@ -132,8 +132,8 @@ contract CDAOAdmins {
         return getCapitalManager().getCapitalToken(relatedBatch);
     }
 
-    function getDaoToken() public view returns (CryptoEduDaoToken) {
-        return cryptoEduDaoToken;
+    function getCUSDToken() public view returns (ISERC20) {
+        return CUSD;
     }
 
     function getTransactionFeesPerBatch() public view returns (uint256){
@@ -189,8 +189,8 @@ contract CDAOAdmins {
         mainCapitalAddress = _addr;
     }
 
-    function setDaoToken(CryptoEduDaoToken _addr) public onlySuperAdmin {
-        cryptoEduDaoToken = _addr;
+    function setCUSDToken(ISERC20 _addr) public onlySuperAdmin {
+        CUSD = _addr;
     }
 
 
@@ -259,6 +259,18 @@ contract CDAOAdmins {
 
     function tokenIsAccepted(address _token) public view returns (bool) {
         return acceptedTokens[_token];
+    }
+
+   function addAcceptedIdoTokens(address _addr) public onlySuperAdmin {
+        acceptedIdoTokens[_addr] = true;
+    }
+
+    function removeAcceptedIdoTokens(address _addr) public onlySuperAdmin {
+        acceptedIdoTokens[_addr] = false;
+    }
+
+    function tokenIsAcceptedIdo(address _token) public view returns (bool) {
+        return acceptedTokens[_token] || acceptedIdoTokens[_token];
     }
 
     function takeSnapshop(uint _snapshopsId) internal {

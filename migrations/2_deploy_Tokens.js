@@ -10,6 +10,7 @@ const IdoManager = artifacts.require("IdoManager")
 const BatchManager = artifacts.require("BatchManager")
 const BallotsManager = artifacts.require("BallotsManager")
 const CecaFarming = artifacts.require("CecaFarming")
+const Redistribute = artifacts.require("Redistribute")
 
 const MigrationV1V2 = artifacts.require("MigrationV1V2")
 
@@ -51,6 +52,7 @@ module.exports = async function (deployer, network, accounts) {
     let idoManager;
     let ballotsManager;
     let cecaFarming;
+    let redistribute;
     let migrationV1V2;
 
     switch (network) {
@@ -66,8 +68,8 @@ module.exports = async function (deployer, network, accounts) {
             await deployer.deploy(CECAToken, "Cedu capital", "Ceca")
             cecaToken = await CECAToken.deployed()
 
-            await deployer.deploy(CryptoEduDaoToken)
-            cryptoEduDaoToken = await CryptoEduDaoToken.deployed()
+           /*await deployer.deploy(CryptoEduDaoToken)
+            cryptoEduDaoToken = await CryptoEduDaoToken.deployed()*/
 
 
             await deployer.deploy(FBusd)
@@ -91,6 +93,9 @@ module.exports = async function (deployer, network, accounts) {
             await deployer.deploy(CecaFarming, cdaoAdmins.address)
             cecaFarming = await CecaFarming.deployed()
 
+            await deployer.deploy(Redistribute, cdaoAdmins.address)
+            redistribute = await Redistribute.deployed()
+
             await deployer.deploy(MigrationV1V2, cdaoAdmins.address)
             migrationV1V2 = await MigrationV1V2.deployed()
 
@@ -100,7 +105,7 @@ module.exports = async function (deployer, network, accounts) {
              */
             // pass minterShip to Capital Manager
             await cecaToken.grantRole(await cecaToken.MINTER_ROLE(), capitalManager.address, {from: accounts[0]})
-            await cryptoEduDaoToken.grantRole(await cryptoEduDaoToken.MINTER_ROLE(), cecaFarming.address, {from: accounts[0]})
+            //await cryptoEduDaoToken.grantRole(await cryptoEduDaoToken.MINTER_ROLE(), cecaFarming.address, {from: accounts[0]})
             /**Set accepted tokens Stable coins only */
             await cdaoAdmins.addAcceptedTokens(fbusdToken.address, {from: accounts[0]})
             /**Set Dao Addresses for diferent purpuse */
@@ -110,7 +115,7 @@ module.exports = async function (deployer, network, accounts) {
             await cdaoAdmins.setMainCapitalAddress(addressesList.testnet.capitalDeposit, {from: accounts[0]})
             /**Set token */
             //await cdaoAdmins.setCapitalToken(cecaToken.address, {from: accounts[0]})
-            await cdaoAdmins.setDaoToken(cryptoEduDaoToken.address, {from: accounts[0]})
+            //await cdaoAdmins.setDaoToken(cryptoEduDaoToken.address, {from: accounts[0]})
             /**Set managers */
             await cdaoAdmins.setCapitalManagerByAdmin(capitalManager.address, {from: accounts[0]})
             await cdaoAdmins.setIdoManagerByAdmin(idoManager.address, {from: accounts[0]})

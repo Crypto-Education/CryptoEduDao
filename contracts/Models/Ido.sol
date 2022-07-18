@@ -38,6 +38,10 @@ contract Ido is CeEduOwnable {
         maxPerUser = _maxPerUser;
         emit idoNewIdoAdded(address (this));
     }
+    modifier mostHaveTakenSnapShot() {
+        require(snapshopsId != 0, "most have taken snap");
+        _;
+    }
 
     modifier isEligibleForIdo() {
         require(
@@ -47,15 +51,34 @@ contract Ido is CeEduOwnable {
         _;
     }
 
-    function isEligible() public view returns(bool) {
-        if (getAdminSetting().checkEligibility(msg.sender)) {
+    function isEligible() public returns(bool) {
+        if (getAdminSetting().checkEligibility(msg.sender, snapshopsId, address(0))) {
             return balanceOfParticipant[msg.sender] < maxPerUser;
         }
         return false;
     }
-    function setIdoToken(IERC20 _token, uint256 _numberOfToken, uint256 _totalAmountSpent, IERC20 _payCrypto) public noReEntrancy onlyAdmin {
+
+    function depositForIdo(uint256 _amount, IERC20 _payCrypto) public noReEntrancy isEligibleForIdo returns (bool)  {
+        // Require amount greater than 0
+        require(getAdminSetting().tokenIsAcceptedIdo(address(_payCrypto)) && _payCrypto.balanceOf(msg.sender) >= _amount, "No enough Token to pay");
+        require(_amount >= 0 && _amount + balanceOfParticipant[msg.sender] <= maxPerUser && !isLocked, "amount cannot be 0 and should be less than maximum");
+        // Transfer 
+        // approve
+        require(_payCrypto.transferFrom(msg.sender, getAdminSetting().getIdoReceiverAddress(), _amount), "Unable to transfer crypto");
+
+        balanceOfParticipant[msg.sender] += _amount;
+        totalDeposited += _amount;
+
+        if (!hasParticipated[msg.sender]) {
+            stakers.push(msg.sender);
+            hasParticipated[msg.sender] = true;
+        }
+        weightOfParticipant[msg.sender] = getAdminSetting().getBatchManager().getUserWeight(msg.sender, snapshopsId); // because weith can change from ido to IDO we need to keep track of in each IDO
+        return true;
+    }
+
+    function setIdoToken(IERC20 _token, uint256 _numberOfToken, uint256 _totalAmountSpent) public noReEntrancy onlyAdmin {
         require(isLocked && priceSpentForToken == 0, "Ido should be locked or Price is already set");
-        require(getAdminSetting().tokenIsAccepted(address(_payCrypto)), "No enough Token to pay");
         tokenToTransfer = _token;
         numberOfTokenFromIdo = _numberOfToken;
         priceSpentForToken = _totalAmountSpent;
@@ -63,14 +86,12 @@ contract Ido is CeEduOwnable {
 
         // redistribute the extra deposited 
         for (uint i = 0; i < stakers.length; i++) {
-            // 
-            uint256 amountPerUser = ((priceSpentForToken / idoTotalWeight) * (weightOfParticipant[stakers[i]])) + getAdminSetting().getTransactionFeesPerBatch();
+            // to correct
+            uint256 amountPerUser = ((priceSpentForToken * 1000 / idoTotalWeight) * (weightOfParticipant[stakers[i]]) / 1000) + getAdminSetting().getTransactionFeesPerBatch();
             if (balanceOfParticipant[stakers[i]] > amountPerUser) {
-                // send back extra busd
-                _payCrypto.transfer(
-                    stakers[i],
-                    balanceOfParticipant[stakers[i]] - amountPerUser
-                );
+                // set the extra according to his weight to be used for next ido
+                getAdminSetting().getCUSDToken().mint(stakers[i], balanceOfParticipant[stakers[i]] - amountPerUser);
+                // real amount considered for this IDO
                 balanceOfParticipant[stakers[i]] = amountPerUser;
             }
         }
@@ -89,7 +110,6 @@ contract Ido is CeEduOwnable {
         uint256 onePercent = numberOfTokenFromIdo / 100;
         uint256 remainingToDistribute = numberOfTokenFromIdo - onePercent - numberOfTokenDistributed;
         uint256 amountToDistributeNow = remainingToDistribute;
-        
         uint256 thisAddressBalance = tokenToTransfer.balanceOf(address(this));
 
         if (thisAddressBalance == 0) {
@@ -100,8 +120,7 @@ contract Ido is CeEduOwnable {
         if (thisAddressBalance <= remainingToDistribute) {
             amountToDistributeNow = thisAddressBalance;
         }
-        
-        
+
         for (uint i = 0; i < stakers.length; i++) {
             if (balanceOfParticipant[stakers[i]] > 0) {
                 uint256 amountPerUser = amountToDistributeNow / idoTotalWeight * weightOfParticipant[stakers[i]];
@@ -121,25 +140,6 @@ contract Ido is CeEduOwnable {
                 onePercent
             );
         }
-    }
-
-    function depositForIdo(uint256 _amount, IERC20 _payCrypto) public noReEntrancy isEligibleForIdo returns (bool)  {
-        // Require amount greater than 0
-        require(getAdminSetting().tokenIsAccepted(address(_payCrypto)) && _payCrypto.balanceOf(msg.sender) >= _amount, "No enough Token to pay");
-        require(_amount >= 0 && _amount + balanceOfParticipant[msg.sender] <= maxPerUser && !isLocked, "amount cannot be 0 and should be less than maximum");
-        // Transfer 
-        // approve
-        require(_payCrypto.transferFrom(msg.sender, getAdminSetting().getIdoReceiverAddress(), _amount), "Unable to transfer crypto");
-
-        balanceOfParticipant[msg.sender] += _amount;
-        totalDeposited += _amount;
-
-        if (!hasParticipated[msg.sender]) {
-            stakers.push(msg.sender);
-            hasParticipated[msg.sender] = true;
-        }
-        weightOfParticipant[msg.sender] = getAdminSetting().getBatchManager().getUserWeight(msg.sender, snapshopsId); // because weith can change from ido to IDO we need to keep track of in each IDO
-        return true;
     }
 
     function getSumOfAllWeight() public view returns(uint256) {

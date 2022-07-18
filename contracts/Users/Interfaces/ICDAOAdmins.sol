@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import "../../Tokens/CECAToken.sol";
 import "../../Tokens/CryptoEduDaoToken.sol";
 import "../../Managers/Interfaces/IBatchManager.sol";
 import "../../Managers/Interfaces/IIdoManager.sol";
@@ -41,7 +40,9 @@ interface ICDAOAdmins {
 
     function getMainCapitalAddress() external view returns (address);
     
-    function getCapitalToken(address relatedBatch) external view returns (CECAToken);
+    function getCapitalToken(address relatedBatch) external view returns (ISERC20);
+
+    function getCUSDToken() external view returns (ISERC20);
     
     function getDaoToken() external view returns (CryptoEduDaoToken);
 
@@ -76,6 +77,12 @@ interface ICDAOAdmins {
     function removeAcceptedTokens(address _addr) external;
 
     function tokenIsAccepted(address _token) external view returns (bool);
+    
+    function addAcceptedIdoTokens(address _addr) external;
+
+    function removeAcceptedIdoTokens(address _addr) external;
+
+    function tokenIsAcceptedIdo(address _token) external view returns (bool);
     
     function checkEligibility(address _user) external view returns (bool);
 

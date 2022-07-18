@@ -3,8 +3,8 @@ pragma solidity ^0.8.4;
 
 import "../Users/CeEduOwnable.sol";
 
-abstract contract Redistribute is CeEduOwnable {
-    
+contract Redistribute is CeEduOwnable {
+    string name;
     struct aDistribution {
         uint date;
         IERC20 token;
@@ -17,6 +17,10 @@ abstract contract Redistribute is CeEduOwnable {
     mapping(IERC20 => aDistribution) public snapshotsFortoken;
     mapping(address => mapping(IERC20 => uint)) public claimed;
 
+    constructor(address daoAdmin) CeEduOwnable (daoAdmin)
+    {
+        name = "Redistribute - CECA" ;
+    }
     function takeSnapshop() public onlyAdmin returns(uint) {
         snapshots[block.timestamp] = true;
         getAdminSetting().takeSnapshop(block.timestamp);

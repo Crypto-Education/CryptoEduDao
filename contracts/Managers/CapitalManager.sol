@@ -2,7 +2,7 @@
 pragma solidity ^0.8.4;
 
 import "../Users/CeEduOwnable.sol";
-import "../Models/Batch.sol";
+import "../Tokens/CECAToken.sol";
 
 contract CapitalManager is CeEduOwnable {
     using Address for address;

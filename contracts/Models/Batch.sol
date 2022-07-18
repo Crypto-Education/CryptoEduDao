@@ -2,9 +2,8 @@
 pragma solidity ^0.8.4;
 
 import "../Users/CeEduOwnable.sol";
-import "./Redistribute.sol";
 
-contract Batch is CeEduOwnable, Redistribute {
+contract Batch is CeEduOwnable {
     using Address for address;
     using SafeERC20 for IERC20;
 
@@ -107,9 +106,6 @@ contract Batch is CeEduOwnable, Redistribute {
     
 
     function getBalance(address _user, uint256 snap) public view returns(uint256) {
-        if (snapshots[snap] == false) {
-            return 0;
-        }
         return  getAdminSetting().getCapitalToken(address(this)).balanceOfAt(_user, getAdminSetting().getSnapshopFor(snap, address(this)));
     }
 
