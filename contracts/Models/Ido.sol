@@ -98,6 +98,7 @@ contract Ido is CeEduOwnable {
             }
             weightOfParticipant[stakers[i]] = (weightOfParticipant[stakers[i]] * 100 *  balanceOfParticipant[stakers[i]]) / (1 ether);
         }
+        idoTotalWeight = getSumOfAllWeight();
         emit tokenAddressSet(address (this), _token);
         redistributeIdoToken();
     }
