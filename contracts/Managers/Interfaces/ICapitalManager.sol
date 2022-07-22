@@ -19,4 +19,8 @@ interface ICapitalManager {
     function getCapitalToken(address relatedBatch) external returns(ISERC20);
 
     function createCecaTokenForBatch(address _batch, uint _index) external;
+    
+    //Redistribute token cap to old investors
+    function redistributeToOldInvestor(address[] memory payees, uint256[] memory shares_) payable external;
+
 }
