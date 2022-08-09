@@ -163,7 +163,7 @@ contract CDAOAdmins {
         return eligibilityThreshold;
     }
 
-    function getSnapshopFor(uint _snapshopsId, address _batch) view internal returns(uint256){
+    function getSnapshopFor(uint _snapshopsId, address _batch) view public returns(uint256) {
         return snapshops[_snapshopsId][_batch];
     }
 
@@ -273,9 +273,11 @@ contract CDAOAdmins {
         return acceptedTokens[_token] || acceptedIdoTokens[_token];
     }
 
-    function takeSnapshop(uint _snapshopsId) internal {
+    event addressssss(address a);
+    function takeSnapshop(uint _snapshopsId) public {
         for(uint i; i < getBatchManager().getBatchListSize(); i++) {
-            snapshops[_snapshopsId][address(getBatchManager().getBatch(i))] = getCapitalToken(
+            emit addressssss(address(getBatchManager().getBatch(i)));
+            snapshops[_snapshopsId][address(getBatchManager().getBatch(i))] = getCapitalManager().getCapitalToken(
                     address(getBatchManager().getBatch(i))
                 ).snapshot();
         }
@@ -286,15 +288,14 @@ contract CDAOAdmins {
         return totalInLocked >= getEligibilityThreshold()
                 && !capitalManager.isBlacklisted(_user);
     }
-
-    function checkEligibility(address _user, uint256 _snap, address _batchId) public returns (bool) {
+    
+    function checkEligibility(address _user, uint _snap, address _batchId) public returns (bool) {
         uint256 totalInLocked;
         if (_batchId != address(0)) {
             totalInLocked = batchManager.getTotalInLockedBatch(_user, _snap, _batchId);
         } else {
             totalInLocked = batchManager.getTotalInLockedBatch(_user, _snap);
         }
-        
         return totalInLocked >= getEligibilityThreshold() && !capitalManager.isBlacklisted(_user);
     }
 

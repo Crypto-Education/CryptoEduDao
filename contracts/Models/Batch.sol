@@ -97,16 +97,15 @@ contract Batch is CeEduOwnable {
         return getBalance(_userAdd);
     }
     
-    function myDepositedInBatchForUser(address _userAdd, bool _onlyLocked, uint256 snap) public view returns (uint256) {
+    function myDepositedInBatchForUser(address _userAdd, bool _onlyLocked, uint256 snap) public returns (uint256) {
         if (_onlyLocked && !isLocked) {
             return 0;
         }
         return getBalance(_userAdd, snap);
     }
     
-
-    function getBalance(address _user, uint256 snap) public view returns(uint256) {
-        return  getAdminSetting().getCapitalToken(address(this)).balanceOfAt(_user, getAdminSetting().getSnapshopFor(snap, address(this)));
+    function getBalance(address _user, uint256 snap) public returns(uint256) {
+        return  getAdminSetting().getCapitalManager().getCapitalToken(address(this)).balanceOfAt(_user, getAdminSetting().getSnapshopFor(snap, address(this)));
     }
 
     function getBalance(address _user) public view returns(uint256) {

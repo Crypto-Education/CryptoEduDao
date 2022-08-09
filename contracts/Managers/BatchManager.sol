@@ -56,7 +56,8 @@ contract BatchManager is CeEduOwnable {
         return totalInLockedBatch;
     }
 
-    function getTotalInLockedBatch(address _user, uint snap) public view returns(uint256) {
+    event sendElementBatchM(uint nb);
+    function getTotalInLockedBatch(address _user, uint snap) public returns(uint256) {
         uint256 totalInLockedBatch = 0;
         for (uint i = 0; i < batchList.length; i++) {
             totalInLockedBatch += batchList[i].myDepositedInBatchForUser(_user, true, snap);
@@ -64,7 +65,9 @@ contract BatchManager is CeEduOwnable {
         return totalInLockedBatch;
     }
 
-    function getTotalInLockedBatch(address _user, uint snap, address _batchIndex) public view returns(uint256) {
+    function getTotalInLockedBatch(address _user, uint snap, address _batchIndex) public returns(uint256) {
+        
+        //return 0;
         return batchListMap[_batchIndex].myDepositedInBatchForUser(_user, true, snap);
     }
 
@@ -80,7 +83,7 @@ contract BatchManager is CeEduOwnable {
         return  getTotalInLockedBatch(_user) / getAdminSetting().getEligibilityThreshold(); 
     }
 
-    function  getUserWeight(address _user, uint snap) public view returns (uint) {
+    function  getUserWeight(address _user, uint snap) public returns (uint) {
         return getTotalInLockedBatch(_user, snap) / getAdminSetting().getEligibilityThreshold(); 
     }
 
