@@ -16,32 +16,34 @@ const MigrationV1V2 = artifacts.require("MigrationV1V2")
 
 
 
-const addressesList = {
-    mainnet : {
-        busd: "0xe9e7cea3dedca5984780bafc599bd69add087d56",
-        capitalDeposit   : "0xE820cf29813939d84160FEbe5Aa1bd52422b1366",
-        idoMainAddress   : "0xA6A97c85Bd58B4ABd5d5578b4221c8c80B9aB382",
-        idoBusdAddress   : "0xD7AcE5005CE05f7e4F63331cd384c4E49B850C1e",
-        teamAddress      : "0x9B3a3Cc32645D845a25e3c07e9EeC02c2528331b",
-        oldCapitalToken  : "0xD5A26B2c4856F0eB6d3a8f1237152BACC70d4f31",
-        oldCecaBatch     : "0x2db3c0F4172e009d478D399ee12CDBA68875DebE",
-        oldCapitalManager: "0x4c5d6141Ff4BF563779B8547349219804D31Ad68",
-    },
-    testnet : {
-        busd: '0xe9e7cea3dedca5984780bafc599bd69add087d56',
-        capitalDeposit   : '0x70c01f3d85E3EDcC88618ae51E83c6696Ccf15D7', // account 9
-        idoMainAddress   : '0x70c01f3d85E3EDcC88618ae51E83c6696Ccf15D7',
-        idoBusdAddress   : '0x70c01f3d85E3EDcC88618ae51E83c6696Ccf15D7',
-        teamAddress      : '0x70c01f3d85E3EDcC88618ae51E83c6696Ccf15D7',
-        oldCapitalToken  : "0xD5A26B2c4856F0eB6d3a8f1237152BACC70d4f31",
-        oldCecaBatch     : "0x2db3c0F4172e009d478D399ee12CDBA68875DebE",
-        oldCapitalManager: "0x4c5d6141Ff4BF563779B8547349219804D31Ad68",
-    }
-}
 
 
 
 module.exports = async function (deployer, network, accounts) {
+
+    
+    const addressesList = {
+        mainnet : {
+            busd: "0xe9e7cea3dedca5984780bafc599bd69add087d56",
+            capitalDeposit   : "0xE820cf29813939d84160FEbe5Aa1bd52422b1366",
+            idoMainAddress   : "0xA6A97c85Bd58B4ABd5d5578b4221c8c80B9aB382",
+            idoBusdAddress   : "0xD7AcE5005CE05f7e4F63331cd384c4E49B850C1e",
+            teamAddress      : "0x9B3a3Cc32645D845a25e3c07e9EeC02c2528331b",
+            oldCapitalToken  : "0xD5A26B2c4856F0eB6d3a8f1237152BACC70d4f31",
+            oldCecaBatch     : "0x2db3c0F4172e009d478D399ee12CDBA68875DebE",
+            oldCapitalManager: "0x4c5d6141Ff4BF563779B8547349219804D31Ad68",
+        },
+        testnet : {
+            busd: '0xe9e7cea3dedca5984780bafc599bd69add087d56',
+            capitalDeposit   : accounts[9], // account 9
+            idoMainAddress   : accounts[9],
+            idoBusdAddress   : accounts[9],
+            teamAddress      : accounts[9],
+            oldCapitalToken  : "0xD5A26B2c4856F0eB6d3a8f1237152BACC70d4f31",
+            oldCecaBatch     : "0x2db3c0F4172e009d478D399ee12CDBA68875DebE",
+            oldCapitalManager: "0x4c5d6141Ff4BF563779B8547349219804D31Ad68",
+        }
+    }
 
     let cecaToken;
     let cryptoEduDaoToken;

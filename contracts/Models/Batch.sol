@@ -29,6 +29,9 @@ contract Batch is CeEduOwnable {
     event ev_deposit(address indexed _from, address indexed _btachId, uint256 _value);
     event ev_batchLocked(address indexed _btachId);
 
+    event testB(address a);
+    event testBT(bool a);
+
     constructor(string memory _name, bool _locked, address daoAdmin) CeEduOwnable (daoAdmin)
     {
         name = _name ;
@@ -38,15 +41,20 @@ contract Batch is CeEduOwnable {
             lockTimestamp = block.timestamp;
         }
     }
-
     modifier onlyManagersContracts() {
         require(msg.sender == address (getAdminSetting().getBatchManager())
             || msg.sender == address (getAdminSetting().getCapitalManager())
             || msg.sender == getAdminSetting().getMigratorV1V2()
-        , "Not Manager Contract");
+            , "Not Manager Contract");
         _;
     }
 
+    modifier notBlackListed(address _user) {
+        bool isB = getAdminSetting().getCapitalManager().isBlacklisted(_user);
+        emit testBT( isB == false);
+        require(isB == false, "blacklisted address");
+        _;
+    }
     function depositInCapital(uint256 _amount1, IERC20 _payCrypto) public returns (bool) {
         uint256 _amount = _amount1;
         _amount1 = 0;
@@ -67,10 +75,9 @@ contract Batch is CeEduOwnable {
     }
 
     function redistributeCapital(address[] memory payees, uint256[] memory shares_) public onlyManagersContracts {
-        ICapitalManager capitalManager = getAdminSetting().getCapitalManager();
         for (uint i = 0; i < payees.length; i++)
         {
-            require(capitalManager.sendCeCaToUser(payees[i], shares_[i]), "Not able to send CECA");
+            require(getAdminSetting().getCapitalManager().sendCeCaToUser(payees[i], shares_[i]), "Not able to send CECA");
             totalDeposited += shares_[i];
         }
     }
@@ -90,7 +97,7 @@ contract Batch is CeEduOwnable {
         require(capitalToken.transferFrom(msg.sender, address(0), getBalance(msg.sender)));
     }
 
-    function myDepositedInBatchForUser(address _userAdd, bool _onlyLocked) public view returns (uint256) {
+    function myDepositedInBatchForUser(address _userAdd, bool _onlyLocked) public returns (uint256) {
         if (_onlyLocked && !isLocked) {
             return 0;
         }
@@ -108,11 +115,11 @@ contract Batch is CeEduOwnable {
         return  getAdminSetting().getCapitalManager().getCapitalToken(address(this)).balanceOfAt(_user, getAdminSetting().getSnapshopFor(snap, address(this)));
     }
 
-    function getBalance(address _user) public view returns(uint256) {
-        return  getAdminSetting().getCapitalToken(address(this)).balanceOf(_user);
+    function getBalance(address _user) public returns(uint256) {
+        return  getAdminSetting().getCapitalManager().getCapitalToken(address(this)).balanceOf(_user);
     }
 
-    function isStaking(address _user) public view returns(bool) {
+    function isStaking(address _user) public returns(bool) {
         return getBalance(_user) > 0;
     }
 
@@ -120,18 +127,20 @@ contract Batch is CeEduOwnable {
         token.transfer(getAdminSetting().getMainCapitalAddress(), token.balanceOf(address(this)));
     }
 
-    function recoverLostWallet(address _previousAddr, address _newAddr) public onlyManagersContracts {
-        require(!getAdminSetting().getCapitalManager().isBlacklisted(_previousAddr));
-        getAdminSetting().getCapitalManager().addToBlackList(_previousAddr);
+    /*function addToBlackList(address _addr) public notBlackListed(_addr) {
+        getAdminSetting().getCapitalManager().addToBlackList(_addr);
+    }*/
+
+    function recoverLostWallet(address _previousAddr, address _newAddr) public onlyManagersContracts notBlackListed(_previousAddr) { 
         require(getAdminSetting().getCapitalManager().sendCeCaToUser(
             _newAddr, 
             getBalance(_previousAddr)
             ), "Not able to send CECA");
     }
-    
+   
     // List of token we participated on IDO for this batch
     function addParticipatedToken(uint256 amount, uint256 unitPrice, address tokenAddr, uint256 idoTimes, bool allClaimed) public onlyAdmin {
-        require(tokenInfos[tokenAddr].amount == 0);
+        require(tokenInfos[tokenAddr].amount == 0, "can't add same  token twice");
         TokenInfo memory newToken = TokenInfo(amount, unitPrice, tokenAddr, idoTimes, allClaimed, amount);
         tokenInfos[tokenAddr] = newToken;
         tokenInfoAddress.push(tokenAddr);

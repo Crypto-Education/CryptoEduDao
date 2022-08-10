@@ -69,8 +69,8 @@ contract("Batch", async accounts => {
           const capitalDeposited5 = await batchCreated5.depositInCapital(web3.utils.toWei('100000'), fusdDeployed.address, {from : accounts[3]});
           assert.ok(capitalDeposited5.receipt.status,'Dépot effectué dans le 5em batch');
         // account 4 depose dans le batch5
-          const capital4Deposited5 = await batchCreated5.depositInCapital(web3.utils.toWei('20000'), fusdDeployed.address, {from : accounts[4]});
-          assert.ok(capital4Deposited5.receipt.status,'Dépot effectué dans le 5em batch par le user 4');
+        const capital4Deposited5 = await batchCreated5.depositInCapital(web3.utils.toWei('20000'), fusdDeployed.address, {from : accounts[4]});
+        assert.ok(capital4Deposited5.receipt.status,'Dépot effectué dans le 5em batch par le user 4');
         
         //console.log(result);
         
@@ -79,8 +79,8 @@ contract("Batch", async accounts => {
         const lockBatch1 = await batchCreated1.lockBatch((1653399955000), {from : accounts[0]}); 
         assert.ok(lockBatch1.receipt.status,'Batch 1 bloqué');
         // On bloque le 5em batch (seul l'admin peut bloquer le batch)
-         const lockBatch2 = await batchCreated3.lockBatch((1653399955000), {from : accounts[0]}); 
-         assert.ok(lockBatch2.receipt.status,'Batch 5 bloqué');
+        const lockBatch2 = await batchCreated3.lockBatch((1653399955000), {from : accounts[0]}); 
+        assert.ok(lockBatch2.receipt.status,'Batch 5 bloqué');
 
         //dépot dans un batch bloqué, On ne peut pas déposer dans un batch bloqué
         //  const depotInBatchLocked = await batchCreated3.depositInCapital(web3.utils.toWei('1000000'), fusdDeployed.address, {from : accounts[0]});      
@@ -90,46 +90,34 @@ contract("Batch", async accounts => {
          assert.ok(result3.receipt.status,'withdraw effectué');*/
         
         // On vérifie le dépot du batch 1
-          const myDepositedInBatchForUser = await batchCreated1.myDepositedInBatchForUser(accounts[0],false, {from : accounts[0]});
-          assert.equal(web3.utils.fromWei(myDepositedInBatchForUser),900000,'myDepositedInBatchForUser not passed');
+          const myDepositedInBatchForUser = await batchCreated1.myDepositedInBatchForUser.call(accounts[0],false, {from : accounts[0]});
+          assert.equal(web3.utils.fromWei(myDepositedInBatchForUser), 900000,'myDepositedInBatchForUser not passed');
           
           // On vérifie le dépot du batch 2
-          const myDepositedInBatchForUser5 = await batchCreated2.myDepositedInBatchForUser(accounts[0],false, {from : accounts[0]});
+          const myDepositedInBatchForUser5 = await batchCreated2.myDepositedInBatchForUser.call(accounts[0],false, {from : accounts[0]});
           assert.equal(web3.utils.fromWei(myDepositedInBatchForUser5),500000,'myDepositedInBatchForUser1 not passed');
             
           // On vérifie le dépot du batch 3
-          const myDepositedInBatchForUser3 = await batchCreated3.myDepositedInBatchForUser(accounts[1],false, {from : accounts[0]});
+          const myDepositedInBatchForUser3 = await batchCreated3.myDepositedInBatchForUser.call(accounts[1],false, {from : accounts[0]});
           assert.equal(web3.utils.fromWei(myDepositedInBatchForUser3),80000,'myDepositedInBatchForUser2 not passed');
             
           // On vérifie le dépot du batch 4
-          const myDepositedInBatchForUser4 = await batchCreated4.myDepositedInBatchForUser(accounts[2],false, {from : accounts[0]});
+          const myDepositedInBatchForUser4 = await batchCreated4.myDepositedInBatchForUser.call(accounts[2],false, {from : accounts[0]});
           assert.equal(web3.utils.fromWei(myDepositedInBatchForUser4),60000,'myDepositedInBatchForUser3 not passed');
 
           // On vérifie le dépot du batch 5 par user 3
-           const myDepositedInBatch5ForUser3 = await batchCreated5.myDepositedInBatchForUser(accounts[3],false, {from : accounts[1]});
-           assert.equal(web3.utils.fromWei(myDepositedInBatch5ForUser3),100000,'myDepositedInBatch5ForUser3 not passed');
+          const myDepositedInBatch5ForUser3 = await batchCreated5.myDepositedInBatchForUser.call(accounts[3],false, {from : accounts[1]});
+          assert.equal(web3.utils.fromWei(myDepositedInBatch5ForUser3),100000,'myDepositedInBatch5ForUser3 not passed');
          
            // On vérifie le dépot du batch 5 par user 4
-          const myDepositedInBatch5ForUser4 = await batchCreated5.myDepositedInBatchForUser(accounts[4],false, {from : accounts[0]});
+          const myDepositedInBatch5ForUser4 = await batchCreated5.myDepositedInBatchForUser.call(accounts[4],false, {from : accounts[0]});
           assert.equal(web3.utils.fromWei(myDepositedInBatch5ForUser4),20000,'myDepositedInBatch5ForUser4 not passed');
 
-           const getNumberOfParticipantOfBatch = await batchCreated1.getNumberOfParticipantOfBatch({from : accounts[0]});
-           assert.equal(getNumberOfParticipantOfBatch,1,'getNumberOfParticipantOfBatch not passed');
+          const getBalanceBatchCreated1 = await batchCreated1.getBalance.call(accounts[0]);
+          assert.equal(web3.utils.fromWei(getBalanceBatchCreated1),900000,'getBalanceBatchCreated1 not passed');
 
-           const getNumberOfParticipantOfBatch5 = await batchCreated5.getNumberOfParticipantOfBatch({from : accounts[0]});
-           assert.equal(getNumberOfParticipantOfBatch5,2,'getNumberOfParticipantOfBatch not passed');
-
-           const getBalanceBatchCreated1 = await batchCreated1.getBalance(accounts[0], {from : accounts[0]});
-           assert.equal(web3.utils.fromWei(getBalanceBatchCreated1),900000,'getBalanceBatchCreated1 not passed');
-
-           const getBalanceBatchCreated5 = await batchCreated5.getBalance(accounts[4], {from : accounts[4]});
-           assert.equal(web3.utils.fromWei(getBalanceBatchCreated5),20000,'getBalanceBatchCreated1 not passed');
-
-          const getHasStaked = await batchCreated3.getHasStaked(accounts[1], {from : accounts[0]});
-          assert.equal(getHasStaked,true,'getHasStaked not passed');
-
-          const getIsStaking = await batchCreated1.getIsStaking(accounts[0], {from : accounts[0]});
-          assert.equal(getIsStaking,true,'getIsStaking not passed');
+          const getBalanceBatchCreated5 = await batchCreated5.getBalance.call(accounts[4]);
+          assert.equal(web3.utils.fromWei(getBalanceBatchCreated5),20000,'getBalanceBatchCreated1 not passed');
 
           const emergencyTransfer = await batchCreated4.emergencyTransfer(fusdDeployed.address, {from : accounts[0]});
           assert.ok(emergencyTransfer.receipt.status,'emergencyTransfer effectué');
@@ -169,7 +157,5 @@ contract("Batch", async accounts => {
       assert.ok(await batchCreated1.setTokenInformation(fusdDeployed.address, false, web3.utils.toWei("100"), {from: accounts[0]}),'super admin can call ');
       const tokenInfos = await batchCreated1.tokenInfos.call(fusdDeployed.address);
       assert.equal(tokenInfos.amount,web3.utils.toWei("100"),'amount not equal ');
-      
-
     });
   });

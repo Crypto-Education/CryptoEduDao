@@ -48,7 +48,7 @@ contract BatchManager is CeEduOwnable {
         return batchList.length;
     }
     
-    function getTotalInLockedBatch(address _user) public view returns(uint256) {
+    function getTotalInLockedBatch(address _user) public returns(uint256) {
         uint256 totalInLockedBatch = 0;
         for (uint i = 0; i < batchList.length; i++) {
             totalInLockedBatch += batchList[i].myDepositedInBatchForUser(_user, true);
@@ -56,7 +56,6 @@ contract BatchManager is CeEduOwnable {
         return totalInLockedBatch;
     }
 
-    event sendElementBatchM(uint nb);
     function getTotalInLockedBatch(address _user, uint snap) public returns(uint256) {
         uint256 totalInLockedBatch = 0;
         for (uint i = 0; i < batchList.length; i++) {
@@ -66,11 +65,9 @@ contract BatchManager is CeEduOwnable {
     }
 
     function getTotalInLockedBatch(address _user, uint snap, address _batchIndex) public returns(uint256) {
-        
-        //return 0;
         return batchListMap[_batchIndex].myDepositedInBatchForUser(_user, true, snap);
     }
-
+    
     function recoverLostWallet(address _previousAddr, address _newAddr) public onlySuperAdmin {
         for (uint i = 0; i < batchList.length; i++) {
             batchList[i].recoverLostWallet(_previousAddr, _newAddr);
@@ -78,7 +75,7 @@ contract BatchManager is CeEduOwnable {
     }
     
    
-    function getUserWeight(address _user) public view returns (uint) {
+    function getUserWeight(address _user) public returns (uint) {
         // get more allocation of has deposited way more earlier
         return  getTotalInLockedBatch(_user) / getAdminSetting().getEligibilityThreshold(); 
     }
@@ -87,8 +84,11 @@ contract BatchManager is CeEduOwnable {
         return getTotalInLockedBatch(_user, snap) / getAdminSetting().getEligibilityThreshold(); 
     }
 
-    function getPercentageUserWeight(address _user) public view returns (uint) {
+    function getPercentageUserWeight(address _user) public returns (uint) {
         // get more allocation of has deposited way more earlier
-        return getTotalInLockedBatch(_user) * 100 / getTotalDepositedInAllBatch();
+        if (getTotalDepositedInAllBatch() > 0) {
+            return getTotalInLockedBatch(_user) * 100 / getTotalDepositedInAllBatch();
+        }
+        return 0;
     }
 }

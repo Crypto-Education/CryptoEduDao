@@ -4,6 +4,7 @@ const IdoManager = artifacts.require("IdoManager");
 const fusd = artifacts.require("FBusd");
 const Batch = artifacts.require("Batch");
 const BatchManager = artifacts.require("BatchManager");
+const CapitalManager = artifacts.require("CapitalManager");
 
 const truffleAssert = require("truffle-assertions");
 contract("Ido", async accounts => {
@@ -25,7 +26,7 @@ contract("Ido", async accounts => {
 it("ELIGIBILITY", async () => {
   const cDAOAdmins1= await CDAOAdmins.deployed();
   const fusdDeployed = await fusd.deployed();
-  
+  const capitalMDeployed = await CapitalManager.deployed();
   const idoManagerDeployed = await IdoManager.deployed();
   
   const batchManagerDeployed = await BatchManager.deployed();
@@ -43,18 +44,23 @@ it("ELIGIBILITY", async () => {
   // on peut pas appeler la redistribution directement a partir du bacth on doit passer par le manager
   await truffleAssert.reverts(batchCreated1.redistributeCapital([accounts[1],accounts[2],accounts[3]], [web3.utils.toWei("550"),web3.utils.toWei("450"),web3.utils.toWei("350")]), "Not Manager Contract");
 
-  await batchManagerDeployed.redistributeToOldInvestor([accounts[1],accounts[2],accounts[3],accounts[4],accounts[5],accounts[7],accounts[8], accounts[9]], [web3.utils.toWei("550"),web3.utils.toWei("450"),web3.utils.toWei("350"),web3.utils.toWei("800"),web3.utils.toWei("780"),web3.utils.toWei("70"),web3.utils.toWei("99"), web3.utils.toWei("200")], 2, {from : accounts[0]});
- 
-  assert.isFalse(await idoCreated2.isEligible({from : accounts[0]}), "Account not eligible");
-  assert.isTrue(await idoCreated1.isEligible({from : accounts[1]}), "Account not eligible");
-  assert.isTrue(await idoCreated1.isEligible({from : accounts[2]}), "Account not eligible");
-  assert.isTrue(await idoCreated1.isEligible({from : accounts[3]}), "Account not eligible");
-  assert.isTrue(await idoCreated1.isEligible({from : accounts[4]}), "Account not eligible");
-  assert.isTrue(await idoCreated1.isEligible({from : accounts[5]}), "Account not eligible");
-  assert.isFalse(await idoCreated1.isEligible({from : accounts[6]}), "Account not eligible");
-  assert.isFalse(await idoCreated3.isEligible({from : accounts[7]}), "Account not eligible")
-  assert.isFalse(await idoCreated4.isEligible({from : accounts[8]}), "Account not eligible");
-  assert.isTrue(await idoCreated2.isEligible({from : accounts[9]}), "Account not eligible");
+  await capitalMDeployed.redistributeToOldInvestor([accounts[1],accounts[2],accounts[3],accounts[4],accounts[5],accounts[7],accounts[8], accounts[9]], [web3.utils.toWei("550"),web3.utils.toWei("450"),web3.utils.toWei("350"),web3.utils.toWei("800"),web3.utils.toWei("780"),web3.utils.toWei("70"),web3.utils.toWei("99"), web3.utils.toWei("200")], 2, {from : accounts[0]});
+  
+  await idoCreated1.takeSnapshop({from:accounts[0]});
+  await idoCreated2.takeSnapshop({from:accounts[0]});
+  await idoCreated3.takeSnapshop({from:accounts[0]});
+  await idoCreated4.takeSnapshop({from:accounts[0]});
+
+  assert.isFalse(await idoCreated2.isEligible.call({from : accounts[0]}), "Account not eligible");
+  assert.isTrue( await idoCreated1.isEligible.call({from : accounts[1]}), "Account not eligible");
+  assert.isTrue( await idoCreated1.isEligible.call({from : accounts[2]}), "Account not eligible");
+  assert.isTrue( await idoCreated1.isEligible.call({from : accounts[3]}), "Account not eligible");
+  assert.isTrue( await idoCreated1.isEligible.call({from : accounts[4]}), "Account not eligible");
+  assert.isTrue( await idoCreated1.isEligible.call({from : accounts[5]}), "Account not eligible");
+  assert.isFalse(await idoCreated1.isEligible.call({from : accounts[6]}), "Account not eligible");
+  assert.isFalse(await idoCreated3.isEligible.call({from : accounts[7]}), "Account not eligible")
+  assert.isFalse(await idoCreated4.isEligible.call({from : accounts[8]}), "Account not eligible");
+  assert.isTrue( await idoCreated2.isEligible.call({from : accounts[9]}), "Account not eligible");
  
 }); 
 
@@ -118,7 +124,7 @@ it("DEPOSIT", async () => {
 it("SET TOKEN", async () => {
   const cDAOAdmins1= await CDAOAdmins.deployed();
   const fusdDeployed = await fusd.deployed();
-  
+  const capitalMDeployed = await CapitalManager.deployed();
   const idoManagerDeployed = await IdoManager.deployed();
   const batchManagerDeployed = await BatchManager.deployed();
 
@@ -135,7 +141,7 @@ it("SET TOKEN", async () => {
     
   const batchCreated1 = await Batch.at(await batchManagerDeployed.getBatch.call(3));
     //personne ayant déposer le capital
-  await batchManagerDeployed.redistributeToOldInvestor([accounts[1],accounts[2],accounts[3],accounts[4],accounts[5],accounts[7],accounts[8], accounts[9]], [web3.utils.toWei("550"),web3.utils.toWei("450"),web3.utils.toWei("350"),web3.utils.toWei("800"),web3.utils.toWei("780"),web3.utils.toWei("70"),web3.utils.toWei("99"), web3.utils.toWei("200")], 0, {from : accounts[0]})
+  await capitalMDeployed.redistributeToOldInvestor([accounts[1],accounts[2],accounts[3],accounts[4],accounts[5],accounts[7],accounts[8], accounts[9]], [web3.utils.toWei("550"),web3.utils.toWei("450"),web3.utils.toWei("350"),web3.utils.toWei("800"),web3.utils.toWei("780"),web3.utils.toWei("70"),web3.utils.toWei("99"), web3.utils.toWei("200")], 0, {from : accounts[0]})
 
 
   
@@ -161,9 +167,9 @@ it("SET TOKEN", async () => {
   
   assert.ok(await fusdDeployed.approve(idoCreated1.address, web3.utils.toWei("10000000000"), {from: accounts[9]}))
   
-  await truffleAssert.reverts(idoCreated1.setIdoToken(fusdDeployed.address, web3.utils.toWei("45.5"), web3.utils.toWei("10.86"),fusdDeployed.address, {from: accounts[4]})); // seulemet un admin ou un super admin peuvent
-  assert.ok(await idoCreated1.setIdoToken(fusdDeployed.address, web3.utils.toWei("45.5"), web3.utils.toWei("10.86"),fusdDeployed.address, {from: accounts[0]})); 
-  await truffleAssert.reverts(idoCreated1.setIdoToken(fusdDeployed.address, web3.utils.toWei("45.5"), web3.utils.toWei("10.86"),fusdDeployed.address, {from: accounts[0]}));  // on ne peut pas set 2 fois 
+  await truffleAssert.reverts(idoCreated1.setIdoToken(fusdDeployed.address, web3.utils.toWei("45.5"), web3.utils.toWei("10.86"), {from: accounts[4]})); // seulemet un admin ou un super admin peuvent
+  assert.ok(await idoCreated1.setIdoToken(fusdDeployed.address, web3.utils.toWei("45.5"), web3.utils.toWei("10.86"), {from: accounts[0]})); 
+  await truffleAssert.reverts(idoCreated1.setIdoToken(fusdDeployed.address, web3.utils.toWei("45.5"), web3.utils.toWei("10.86"), {from: accounts[0]}));  // on ne peut pas set 2 fois 
 
   assert.ok(await idoCreated1.redistributeIdoToken({from: accounts[0]})); 
  

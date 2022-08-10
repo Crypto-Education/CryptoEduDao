@@ -74,9 +74,6 @@ contract("Ballot", async accounts => {
         await truffleAssert.reverts(ballotCreated1.vote( proposal, {from : accounts[8]})); // cant vote because deposited balance < 100
 
         const snapId = (await ballotCreated1.snapshopsId.call()).toString();
-        console.log(snapId);
-        console.log(batch1.address);
-        console.log((await cDAOAdmins1.checkEligibility.call(accounts[9], snapId, "0x0000000000000000000000000000000000000000")).toString());
 
         assert.ok(await ballotCreated1.vote( proposal, {from : accounts[9]}),'Vote effectué avec succès'); 
         //await truffleAssert.reverts(ballotCreated1.vote( proposal, {from : accounts[9]})); // can vote because deposited balance > 100
@@ -113,14 +110,14 @@ contract("Ballot", async accounts => {
         const ballotCreated3 = await Ballot.at(await ballotManagerDeployed.getBallot.call(2));
         const ballotCreated4 = await Ballot.at(await ballotManagerDeployed.getBallot.call(3));
 
-        assert.equal(await ballotCreated1.winningProposal(), 0,'Cette proposition  na pas gagné');
-        assert.equal(await ballotCreated2.winningProposal(), 0,'Cette proposition  na pas gagné');
-        assert.equal(await ballotCreated3.winningProposal(), 2,'Cette proposition  na pas gagné');
-        assert.equal(await ballotCreated4.winningProposal(), 2,'Cette proposition  na pas gagné');
-        assert.equal(await ballotCreated1.winnerName(),'OUI','la popisition gagnante n est pas correct');  
-        assert.equal(await ballotCreated2.winnerName(),'GREEN','la popisition gagnante n est pas correct');  
-        assert.equal(await ballotCreated3.winnerName(),'NONE','la popisition gagnante n est pas correct');  
-        assert.equal(await ballotCreated4.winnerName(),'NONE','la popisition gagnante n est pas correct');  
+        assert.equal(await ballotCreated1.winningProposal.call(), 0,'Cette proposition  na pas gagné');
+        assert.equal(await ballotCreated2.winningProposal.call(), 0,'Cette proposition  na pas gagné');
+        assert.equal((await ballotCreated3.winningProposal.call()).toString(), 2,'Cette proposition  na pas gagné');
+        assert.equal((await ballotCreated4.winningProposal.call()).toString(), 2,'Cette proposition  na pas gagné');
+        assert.equal(await ballotCreated1.winnerName.call(),'OUI','la popisition gagnante n est pas correct');  
+        assert.equal(await ballotCreated2.winnerName.call(),'GREEN','la popisition gagnante n est pas correct');  
+        assert.equal(await ballotCreated3.winnerName.call(),'NONE','la popisition gagnante n est pas correct');  
+        assert.equal(await ballotCreated4.winnerName.call(),'NONE','la popisition gagnante n est pas correct');  
     
     });
     it("LOCK VOTE", async () => {
@@ -157,14 +154,14 @@ contract("Ballot", async accounts => {
         const ballotCreated3 = await Ballot.at(await ballotManagerDeployed.getBallot.call(2));
         const ballotCreated4 = await Ballot.at(await ballotManagerDeployed.getBallot.call(3));
 
-        assert.equal(await ballotCreated1.canVote({from : accounts[1]}),false,'He cannot vote'); 
-        assert.equal(await ballotCreated1.canVote({from : accounts[7]}), false,'He cannot vote'); 
+        assert.equal(await ballotCreated1.canVote.call({from : accounts[1]}),false,'He cannot vote'); 
+        assert.equal(await ballotCreated1.canVote.call({from : accounts[7]}), false,'He cannot vote'); 
 
         // le account 1 a déjà voté dans ballot2
-        assert.equal(await ballotCreated2.canVote({from : accounts[1]}), false,'He cannot vote'); 
+        assert.equal(await ballotCreated2.canVote.call({from : accounts[1]}), false,'He cannot vote'); 
 
-        assert.equal(await ballotCreated3.canVote({from : accounts[3]}),false,'He cannot vote');
-        assert.equal(await ballotCreated3.canVote({from : accounts[0]}),true,'He cannot vote');
+        assert.equal(await ballotCreated3.canVote.call({from : accounts[3]}), false,'He cannot vote');
+        assert.equal(await ballotCreated3.canVote.call({from : accounts[0]}), true,'He cannot vote');
     });
     
 });

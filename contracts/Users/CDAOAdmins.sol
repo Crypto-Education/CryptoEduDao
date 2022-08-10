@@ -273,10 +273,8 @@ contract CDAOAdmins {
         return acceptedTokens[_token] || acceptedIdoTokens[_token];
     }
 
-    event addressssss(address a);
     function takeSnapshop(uint _snapshopsId) public {
         for(uint i; i < getBatchManager().getBatchListSize(); i++) {
-            emit addressssss(address(getBatchManager().getBatch(i)));
             snapshops[_snapshopsId][address(getBatchManager().getBatch(i))] = getCapitalManager().getCapitalToken(
                     address(getBatchManager().getBatch(i))
                 ).snapshot();

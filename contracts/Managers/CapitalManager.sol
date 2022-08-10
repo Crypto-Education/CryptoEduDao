@@ -13,7 +13,7 @@ contract CapitalManager is CeEduOwnable {
 
     string public name;
     mapping (address => uint256) public capitalBalance;
-    mapping (address => bool) private _blackListAddr;
+    mapping (address => bool) public _blackListAddr;
 
     constructor(address daoAdmin) CeEduOwnable (daoAdmin)
     {
@@ -26,7 +26,7 @@ contract CapitalManager is CeEduOwnable {
     }
 
     modifier onlyCeCaBatchAndSuperAdmin() {
-        require( getAdminSetting().isSuperAdmin(msg.sender) || getAdminSetting().getBatchManager().isBatch(msg.sender));
+        require( getAdminSetting().isSuperAdmin(msg.sender) || getAdminSetting().getBatchManager().isBatch(msg.sender), "not CeCaBatch not SuperAdmin");
         _;
     }
 
