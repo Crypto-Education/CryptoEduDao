@@ -7,6 +7,7 @@ import "../Managers/CapitalManager.sol";
 
 /// @title Voting with delegation.
 contract Ballot is CeEduOwnable {
+
     string public name;
     uint256 public snapshopsId;
     address public concernedBatch;
@@ -31,12 +32,12 @@ contract Ballot is CeEduOwnable {
     // A dynamically-sized array of `Proposal` structs.
     Proposal[] public proposals;
 
-    bool public completed;
+    uint public dateEnd;
 
     /// Create a new ballot to choose one of `proposalNames`.
-    constructor(string memory _name, string[] memory proposalNames, address daoAdmin) CeEduOwnable (daoAdmin) {
+    constructor(string memory _name, string[] memory proposalNames, address daoAdmin, uint _dateEnd) CeEduOwnable (daoAdmin) {
         name = _name;
-        completed = false;
+        dateEnd = _dateEnd;
         for (uint i = 0; i < proposalNames.length; i++) {
             proposals.push(Proposal({
             name: proposalNames[i],
@@ -57,11 +58,14 @@ contract Ballot is CeEduOwnable {
         );
         _;
     }
+
+    modifier canVoteCheck() {
+        require(canVote(), "Vote is completed or proposal not found or Already voted.");
+        _;
+    }
     
-    function vote(uint proposal) public snapTaken isEligibleForIdo {
-        require(!completed && proposal < proposals.length , "Vote is completed or proposal not found");
+    function vote(uint proposal) public snapTaken canVoteCheck isEligibleForIdo  {
         Voter storage sender = voters[msg.sender];
-        require(!sender.voted, "Already voted.");
         sender.voted = true;
         sender.vote = proposal;
         sender.weight = getAdminSetting().getBatchManager().getUserWeight(msg.sender, snapshopsId);
@@ -87,16 +91,12 @@ contract Ballot is CeEduOwnable {
         winnerName_ = proposals[winningProposal()].name;
     }
 
-    function lockVote() public onlyAdmin {
-        completed = true;
-    }
-
     function getProposalSize() public view returns(uint) {
         return proposals.length;
     }
 
     function canVote() public view returns(bool) {
-        return voters[msg.sender].voted == false && completed == false;
+        return voters[msg.sender].voted == false && dateEnd < block.timestamp;
     }
 
     function takeSnapshop() public onlyAdmin {

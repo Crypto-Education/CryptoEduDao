@@ -13,7 +13,6 @@ contract Batch is CeEduOwnable {
     uint256 public beginWithdrawTimestamp;
     bool public isLocked;
     uint256 public totalDeposited;
-    uint256 public totalWithdraw;
 
     struct TokenInfo {
         uint256 amount;
@@ -149,5 +148,9 @@ contract Batch is CeEduOwnable {
     function setTokenInformation(address tokenAddr, bool allClaimed, uint256 _amount) public onlyAdmin {
         tokenInfos[tokenAddr].allClaimed = allClaimed;
         tokenInfos[tokenAddr].amount = _amount;
+    }
+
+    function getTokenInfoAddressSize() public view returns(uint) {
+        return tokenInfoAddress.length;
     }
 }

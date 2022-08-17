@@ -12,8 +12,8 @@ contract BallotsManager is CeEduOwnable{
         name = 'CEDU_BallotsManager';
     }
 
-    function initialiseNewBallot(string memory _name, string[] memory proposalNames) public onlyAdmin returns (bool) {
-        Ballot newBallot = new Ballot(_name, proposalNames, address(getAdminSetting()));
+    function initialiseNewBallot(string memory _name, string[] memory proposalNames, uint _dateEnd) public onlyAdmin returns (bool) {
+        Ballot newBallot = new Ballot(_name, proposalNames, address(getAdminSetting()), _dateEnd);
         ballotsList.push(newBallot);
         return true;
     }

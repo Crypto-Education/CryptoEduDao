@@ -64,33 +64,17 @@ module.exports = async function (deployer, network, accounts) {
         case "poly_testnet":
         case "aur_testnet":
             // Deploy CDAOAdmins
-            await deployer.deploy(CDAOAdmins)
-            cdaoAdmins = await CDAOAdmins.deployed()
+            //await deployer.deploy(CDAOAdmins)
+            /*cdaoAdmins = await CDAOAdmins.deployed()
 
-            /**
-             * deploy tokens
-             */
-            //await deployer.deploy(CECAToken, "Cedu capital", "Ceca")
-            //cecaToken = await CECAToken.deployed()
+            await deployer.deploy(BallotsManager, cdaoAdmins.address)
+            ballotsManager = await BallotsManager.deployed()
 
-           /*await deployer.deploy(CryptoEduDaoToken)
-            cryptoEduDaoToken = await CryptoEduDaoToken.deployed()*/
+            await deployer.deploy(CecaFarming, cdaoAdmins.address)
+            cecaFarming = await CecaFarming.deployed()
 
-
-            await deployer.deploy(FBusd)
-            fbusdToken = await FBusd.deployed()
-
-            /**
-             * deploy managers
-             */
-            await deployer.deploy(CapitalManager, cdaoAdmins.address)
-            capitalManager = await CapitalManager.deployed()
-
-            await deployer.deploy(BatchManager, cdaoAdmins.address)
-            batchManager = await BatchManager.deployed()
-
-            await deployer.deploy(IdoManager, cdaoAdmins.address)
-            idoManager = await IdoManager.deployed()
+            await deployer.deploy(Redistribute, cdaoAdmins.address)
+            redistribute = await Redistribute.deployed()*/
             
             break;
 

@@ -21,10 +21,10 @@ contract("Ballot", async accounts => {
         const batchManager1 = await BatchManager.deployed();
 
         // seul l'admin peut initialiser le batch
-        await ballotManagerDeployed.initialiseNewBallot('Ballot TEST 1', proposalNames, {from : accounts[0]});
-        await ballotManagerDeployed.initialiseNewBallot('Ballot TEST 2', proposalNames1, {from : accounts[0]});
-        await ballotManagerDeployed.initialiseNewBallot('Ballot TEST 3', proposalNames2, {from : accounts[0]});
-        await ballotManagerDeployed.initialiseNewBallot('Ballot TEST 4', proposalNames3, {from : accounts[0]});
+        await ballotManagerDeployed.initialiseNewBallot('Ballot TEST 1', proposalNames, Date.now() + 10000, {from : accounts[0]});
+        await ballotManagerDeployed.initialiseNewBallot('Ballot TEST 2', proposalNames1, Date.now() + 10000, {from : accounts[0]});
+        await ballotManagerDeployed.initialiseNewBallot('Ballot TEST 3', proposalNames2, Date.now() + 10000, {from : accounts[0]});
+        await ballotManagerDeployed.initialiseNewBallot('Ballot TEST 4', proposalNames3, Date.now() + 10000, {from : accounts[0]});
        
     });
 

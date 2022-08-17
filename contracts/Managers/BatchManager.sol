@@ -91,4 +91,9 @@ contract BatchManager is CeEduOwnable {
         }
         return 0;
     }
+
+    function getAllBatchAdresses() public view returns(Batch[] memory) 
+    {
+        return batchList;
+    }
 }
