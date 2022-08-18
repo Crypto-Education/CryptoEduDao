@@ -65,7 +65,7 @@ module.exports = async function (deployer, network, accounts) {
         case "aur_testnet":
             // Deploy CDAOAdmins
             //await deployer.deploy(CDAOAdmins)
-            /*cdaoAdmins = await CDAOAdmins.deployed()
+            cdaoAdmins = await CDAOAdmins.deployed()
 
             await deployer.deploy(BallotsManager, cdaoAdmins.address)
             ballotsManager = await BallotsManager.deployed()
@@ -74,7 +74,7 @@ module.exports = async function (deployer, network, accounts) {
             cecaFarming = await CecaFarming.deployed()
 
             await deployer.deploy(Redistribute, cdaoAdmins.address)
-            redistribute = await Redistribute.deployed()*/
+            redistribute = await Redistribute.deployed()
             
             break;
 

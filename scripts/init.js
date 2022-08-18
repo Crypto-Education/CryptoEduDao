@@ -12,7 +12,7 @@ module.exports = async function (callback) {
     const accounts = await new web3.eth.getAccounts()
     
     const batchMDeployed = await BatchManager.deployed();
-    /*const cDAOAdmins = await CDAOAdmins.deployed();
+    const cDAOAdmins = await CDAOAdmins.deployed();
 
     await batchMDeployed.createAppendBatch("Batch 3 |Test Blockchain", false, {from: accounts[0]})
     // pass role to account 1 
@@ -31,7 +31,7 @@ module.exports = async function (callback) {
           [web3.utils.toWei("100"),web3.utils.toWei("100"),web3.utils.toWei("200")], 
           0, 
           {from: accounts[0]}
-        )*/
+        )
     console.log(batchMDeployed.address);
     /**
     let data = await batchMDeployed.getTotalDepositedInAllBatch.call(); 

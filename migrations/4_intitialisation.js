@@ -63,28 +63,28 @@ module.exports = async function (deployer, network, accounts) {
         case "poly_testnet":
         case "aur_testnet":
             // Deploy CDAOAdmins
-            /*cdaoAdmins = await CDAOAdmins.deployed()
+            cdaoAdmins = await CDAOAdmins.deployed()
             fbusdToken = await FBusd.deployed()
             capitalManager = await CapitalManager.deployed()
             batchManager = await BatchManager.deployed()
             idoManager = await IdoManager.deployed()
             ballotsManager = await BallotsManager.deployed()
-            cecaFarming = await CecaFarming.deployed()*/
+            cecaFarming = await CecaFarming.deployed()
 
             //await cdaoAdmins.addAcceptedTokens(fbusdToken.address, {from: accounts[0]})
             /**Set Dao Addresses for diferent purpuse */
-            /***await cdaoAdmins.setIdoMainAddress(addressesList.testnet.idoMainAddress, {from: accounts[0]})
+            await cdaoAdmins.setIdoMainAddress(addressesList.testnet.idoMainAddress, {from: accounts[0]})
             await cdaoAdmins.setIdoReceiverAddress( addressesList.testnet.idoBusdAddress, {from: accounts[0]})
             await cdaoAdmins.setTeamAddress(addressesList.testnet.teamAddress, {from: accounts[0]})
-            await cdaoAdmins.setMainCapitalAddress(addressesList.testnet.capitalDeposit, {from: accounts[0]})***/
+            await cdaoAdmins.setMainCapitalAddress(addressesList.testnet.capitalDeposit, {from: accounts[0]})
             /**Set token */
             //await cdaoAdmins.setCapitalToken(cecaToken.address, {from: accounts[0]})
             //await cdaoAdmins.setDaoToken(cryptoEduDaoToken.address, {from: accounts[0]})
             /**Set managers */
-            /***await cdaoAdmins.setCapitalManagerByAdmin(capitalManager.address, {from: accounts[0]})
+            await cdaoAdmins.setCapitalManagerByAdmin(capitalManager.address, {from: accounts[0]})
             await cdaoAdmins.setIdoManagerByAdmin(idoManager.address, {from: accounts[0]})
             await cdaoAdmins.setBatchManagerByAdmin(batchManager.address, {from: accounts[0]})
-            await cdaoAdmins.setBallotManagerByAdmin(ballotsManager.address, {from: accounts[0]})***/
+            await cdaoAdmins.setBallotManagerByAdmin(ballotsManager.address, {from: accounts[0]})
             /**Set Migratot Contract */
             //await cdaoAdmins.setMigratorV1V2(migrationV1V2.address, {from: accounts[0]})
             /** Set Old contracts for migration from V1 */
@@ -93,8 +93,8 @@ module.exports = async function (deployer, network, accounts) {
             await cdaoAdmins.setOldCapitalManager(addressesList.testnet.oldCapitalManager, {from: accounts[0]})*/
 
             /**Initialise data contracts */
-            /***await batchManager.createAppendBatch("Batch 0 |Capital Initial", true, {from: accounts[0]})
-            await batchManager.createAppendBatch("Batch 1 |Partisia Blockchain", true, {from: accounts[0]})***/
+            await batchManager.createAppendBatch("Batch 0 |Capital Initial", true, {from: accounts[0]})
+            await batchManager.createAppendBatch("Batch 1 |Partisia Blockchain", true, {from: accounts[0]})
             
             break;
 
